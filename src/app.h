@@ -52,6 +52,7 @@ namespace muisc {
 
 enum class Mode { Browse, Search, Settings, ColorEdit, Console, Cheatsheet, BulkAdd, RetryLyrics, Playlist, MetaEdit, History, ClearQueue, OsciMenu, NormMenu, Equalizer, SleepTimer, LyricsEdit, Karaoke, SpectroMenu, Wizard, ReadLyrics, Creator, MenuIndex, UpdateNotice, QueueToPlaylist, BookOverlay };
 enum class ListSource { Local, Online, Playlist, Folder };
+constexpr int kPlayModeBoxInner = 7;   // the play mode box beside the search bar: room for the longest word (SHUFFLE)
 
 // One row of the main UI's "/f:" folder list: a folder that directly
 // contains at least one scanned local track.
@@ -369,6 +370,7 @@ private:
         int direct = 0;       // music files lying directly in it
         int subs = 0;         // folders below it that hold music
         int total = 0;        // music files in it and below it
+        bool all = false;     // the "All" row at the top of the root: not a folder, lists every track
     };
     bool folders_pane_ = false;
     std::string fx_dir_;      // the folder whose subfolders are shown ("" = the local music paths themselves)
@@ -1405,6 +1407,7 @@ private:
     // L=list, R=repeat, S=shuffle, Q=queue then stop, O=stop (play-and-stop
     // -- not "S", that's shuffle's letter already).
     char play_mode_letter() const;
+    std::string play_mode_word() const;   // PlusOne: LIST / REPEAT / SHUFFLE / STOP / QUEUE, padded to kPlayModeBoxInner
     void queue_add_selected_impl(bool at_end);
     void queue_add_selected();           // "a": hovering track as NEXT (see queue_next_run_)
     void queue_remove_last();

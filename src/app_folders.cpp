@@ -101,6 +101,13 @@ const std::vector<App::FxEntry>& App::fx_entries() const {
     }
     std::sort(fx_entries_.begin(), fx_entries_.end(),
               [](const FxEntry& a, const FxEntry& b) { return lower_ascii(a.name) < lower_ascii(b.name); });
+    if (fx_dir_.empty() && !roots.empty()) {   // "All": only at the top of the roots, in front of the folders
+        FxEntry all;
+        all.name = "All";
+        all.all = true;
+        all.total = static_cast<int>(all_local_tracks_.size());
+        fx_entries_.insert(fx_entries_.begin(), std::move(all));
+    }
     return fx_entries_;
 }
 
@@ -128,6 +135,18 @@ void App::fx_open() {
     const auto& es = fx_entries();
     if (fx_selected_ < 0 || fx_selected_ >= static_cast<int>(es.size())) return;
     const FxEntry e = es[static_cast<size_t>(fx_selected_)];
+    if (e.all) {   // every track of every path
+        folder_filter_.clear();
+        last_local_query_.clear();
+        local_sort_mode_ = 0;
+        list_source_ = ListSource::Local;
+        selected_ = 0;
+        scroll_ = 0;
+        refresh_local_view();
+        log_event("folder: All");
+        fx_save_state();
+        return;
+    }
     if (e.direct > 0 && !e.filter.empty()) {   // the music files of the folder into the LOCAL AUDIO FILES pane
         folder_filter_ = e.filter;
         last_local_query_.clear();

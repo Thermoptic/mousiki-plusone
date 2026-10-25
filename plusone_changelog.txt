@@ -57,6 +57,15 @@
   The first ESC still goes back to the home view.
 
 
+  PLAY MODE BOX
+  ------------------------------------------------------------------------
+
+  The box next to the search bar now shows the play mode as a word instead
+  of one letter: LIST, REPEAT, SHUFFLE, STOP or QUEUE (queue then stop).
+  M still steps through the modes. The mode is saved at once and is back
+  the next time Mousiki starts.
+
+
   FOLDERS PANE (Music Player)
   ------------------------------------------------------------------------
 
@@ -68,6 +77,9 @@
 
   * Only folders with music files in them or below them are listed, with
     the number of files in each.
+  * At the top level an "All" row comes first. It is not a folder: ENTER on
+    it lists every track of all the paths in the LOCAL AUDIO FILES pane. It
+    is only there at the top; inside a folder it is gone.
   * ENTER on a folder lists the music files lying directly in it in the
     LOCAL AUDIO FILES pane. If the folder holds more folders, the pane goes
     into it and shows those instead (a ">" marks such a folder).

@@ -2246,6 +2246,29 @@ void App::advance_track() {
     }
 }
 
+// PlusOne: the play mode as a word in the box next to the search bar (LIST, REPEAT, SHUFFLE, STOP, QUEUE), centred in a fixed
+// width so the search bar never changes size when the mode changes.
+std::string App::play_mode_word() const {
+    const char* w = "LIST";
+    switch (settings_.play_mode) {
+        case 1: w = "REPEAT"; break;
+        case 2: w = "SHUFFLE"; break;
+        case 3: w = "STOP"; break;
+        case 4: w = "QUEUE"; break;
+        default: break;
+    }
+    std::string word = w;
+    const int room = kPlayModeBoxInner - static_cast<int>(word.size());
+    return std::string(static_cast<size_t>(room / 2), ' ') + word + std::string(static_cast<size_t>(room - room / 2), ' ');
+}
+
+// The top / bottom edge of that box (a rounded box, kPlayModeBoxInner + 4 wide).
+static std::string play_mode_box_edge(bool top) {
+    std::string e = top ? "╭" : "╰";
+    for (int i = 0; i < kPlayModeBoxInner + 2; ++i) e += "─";
+    return e + (top ? "╮" : "╯");
+}
+
 char App::play_mode_letter() const {
     switch (settings_.play_mode) {
         case 1: return 'R';  // repeat (loop current track)
@@ -3026,6 +3049,7 @@ void App::act_cycle_play_mode() {
     queue_reset_lap();
     static const char* mode_names[] = {"list", "repeat", "shuffle", "stop", "queue then stop"};
     log_event(std::string("play mode: ") + mode_names[settings_.play_mode]);
+    save_settings(settings_);   // PlusOne: the mode is remembered for the next start
 }
 
 void App::act_wizard_toggle() {
@@ -5637,14 +5661,14 @@ std::vector<std::string> App::build_search_bar(int total_width) const {
     std::string border_ansi = ansi_for(settings_.border_color, false);
     std::string border_ansi_bottom = ansi_for(settings_.border_color_bottom, false);
     std::vector<std::string> out;
-    int search_w = total_width - 5;
+    int search_w = total_width - (kPlayModeBoxInner + 4);
     if (mode_ == Mode::Search) label += focus_indicator(settings_, border_ansi);   // the search box has the keys
-    out.push_back(box_top(label, search_w, border_ansi) + border_ansi + "╭───╮\x1b[0m");
+    out.push_back(box_top(label, search_w, border_ansi) + border_ansi + play_mode_box_edge(true) + "\x1b[0m");
     // Play-mode indicator: L=list, R=repeat, S=shuffle, Q=queue then stop,
     // O=stop -- one letter for whichever of the five settings_.play_mode
     // states is active, cycled with a single "m" press
     // (HKeyCyclePlayMode) rather than a separate toggle per mode.
-    std::string mode_letter(1, play_mode_letter());
+    std::string mode_letter = play_mode_word();
     std::string bar = border_ansi + settings_.box_vertical + "\x1b[0m";
     std::string line;
     if (mode_ == Mode::Search) {
@@ -5676,7 +5700,7 @@ std::vector<std::string> App::build_search_bar(int total_width) const {
     }
     out.push_back(line + border_ansi + settings_.box_vertical
                   + " " + mode_letter + " " + settings_.box_vertical + "\x1b[0m");
-    out.push_back(box_bottom(search_w, "", border_ansi_bottom) + border_ansi_bottom + "╰───╯\x1b[0m");
+    out.push_back(box_bottom(search_w, "", border_ansi_bottom) + border_ansi_bottom + play_mode_box_edge(false) + "\x1b[0m");
     return out;
 }
 
@@ -5944,7 +5968,7 @@ std::vector<std::string> App::build_folders_panel(int total_width, int height) c
                 const std::string count = std::to_string(e.total);
                 const int name_w = std::max(4, inner - static_cast<int>(count.size()) - 2);
                 content = pad_right(truncate_str(apply_font_map((e.subs > 0 ? "> " : "  ") + e.name, settings_.font_map), name_w), name_w) + "  " + count;
-                shown = !folder_filter_.empty() && e.filter == folder_filter_;
+                shown = e.all ? folder_filter_.empty() : (!folder_filter_.empty() && e.filter == folder_filter_);
                 hovering = queue_focus_ && idx == fx_selected_;
             }
             const std::string padded = pad_right(truncate_str(content, inner), inner);
@@ -8941,8 +8965,8 @@ std::vector<std::string> App::build_folder_overlay_panel(int panel_w, int list_r
 
     // --- search bar (same look as the main one) ---
     {
-        const int search_w = panel_w - 5;
-        out.push_back(box_top(audiobook_ ? "SEARCH BOOKS" : "SEARCH LOCAL FOLDERS", search_w, border_ansi) + border_ansi + "╭───╮\x1b[0m");
+        const int search_w = panel_w - (kPlayModeBoxInner + 4);
+        out.push_back(box_top(audiobook_ ? "SEARCH BOOKS" : "SEARCH LOCAL FOLDERS", search_w, border_ansi) + border_ansi + play_mode_box_edge(true) + "\x1b[0m");
         const int inner = std::max(0, search_w - 4);
         const std::string pre = audiobook_ ? "/" : "/f:";
         std::string q = fo_query_;
@@ -8952,8 +8976,8 @@ std::vector<std::string> App::build_folder_overlay_panel(int panel_w, int list_r
         std::string line = bar + " " + search_idle_sgr(settings_) + pre + search_run(settings_, q, !q.empty())
                          + (fo_search_ ? search_idle_sgr(settings_) + "█" : std::string())
                          + std::string(static_cast<size_t>(fill), ' ') + "\x1b[0m " + bar;
-        out.push_back(line + border_ansi + settings_.box_vertical + " " + std::string(1, play_mode_letter()) + " " + settings_.box_vertical + "\x1b[0m");
-        out.push_back(box_bottom(search_w, "", border_ansi_bottom) + border_ansi_bottom + "╰───╯\x1b[0m");
+        out.push_back(line + border_ansi + settings_.box_vertical + " " + play_mode_word() + " " + settings_.box_vertical + "\x1b[0m");
+        out.push_back(box_bottom(search_w, "", border_ansi_bottom) + border_ansi_bottom + play_mode_box_edge(false) + "\x1b[0m");
     }
 
     // --- the tree ---
@@ -9481,8 +9505,8 @@ std::vector<std::string> App::build_convert_overlay_panel(int panel_w, int list_
 
     // --- search bar (same look as the main one) ---
     {
-        const int search_w = panel_w - 5;
-        out.push_back(box_top("SEARCH FILES TO CONVERT", search_w, border_ansi) + border_ansi + "╭───╮\x1b[0m");
+        const int search_w = panel_w - (kPlayModeBoxInner + 4);
+        out.push_back(box_top("SEARCH FILES TO CONVERT", search_w, border_ansi) + border_ansi + play_mode_box_edge(true) + "\x1b[0m");
         const int inner = std::max(0, search_w - 4);
         const std::string pre = cv_pick_ == 1 ? "/f:" : cv_pick_ == 2 ? "/p:" : "/";
         std::string q = cv_query_;
@@ -9492,8 +9516,8 @@ std::vector<std::string> App::build_convert_overlay_panel(int panel_w, int list_
         std::string line = bar + " " + search_idle_sgr(settings_) + pre + search_run(settings_, q, !q.empty())
                          + (cv_search_ ? search_idle_sgr(settings_) + "█" : std::string())
                          + std::string(static_cast<size_t>(fill), ' ') + R + " " + bar;
-        out.push_back(line + border_ansi + settings_.box_vertical + " " + std::string(1, play_mode_letter()) + " " + settings_.box_vertical + R);
-        out.push_back(box_bottom(search_w, "", border_ansi_bottom) + border_ansi_bottom + "╰───╯\x1b[0m");
+        out.push_back(line + border_ansi + settings_.box_vertical + " " + play_mode_word() + " " + settings_.box_vertical + R);
+        out.push_back(box_bottom(search_w, "", border_ansi_bottom) + border_ansi_bottom + play_mode_box_edge(false) + "\x1b[0m");
     }
 
     const int inner = panel_w - 4;
