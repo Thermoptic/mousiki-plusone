@@ -65,6 +65,10 @@
   M still steps through the modes. The mode is saved at once and is back
   the next time Mousiki starts.
 
+  Next Track follows the play mode: with SHUFFLE on it jumps to a random
+  track instead of the next one in the list. The queue still plays in
+  order.
+
 
   FOLDERS PANE (Music Player)
   ------------------------------------------------------------------------
@@ -101,7 +105,7 @@
   A key legend now fills the bottom row of the screen:
 
       F1 music   F2 radio   F3 books   F4 wizard   F5 settings
-      F6 folders   F7 queue   ESC ESC quit
+      F6 folders   F7 queue   ESC quit
 
   * It is drawn in the colours of the player and the mode you are in is
     highlighted.

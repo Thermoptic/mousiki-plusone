@@ -3586,7 +3586,7 @@ std::vector<std::string> build_scope_big(const Style& s, const UiModel& m, const
 // PlusOne: the key legend on the last row of the main screen (the same one the music player and the audio book player show).
 std::string build_key_legend(const Style& s, int W) {
     struct Hint { const char* key; const char* label; };
-    static const Hint hints[] = {{"F1", "music"}, {"F2", "radio"}, {"F3", "books"}, {"F4", "wizard"}, {"F5", "settings"}, {"ESC ESC", "quit"}};
+    static const Hint hints[] = {{"F1", "music"}, {"F2", "radio"}, {"F3", "books"}, {"F4", "wizard"}, {"F5", "settings"}, {"ESC", "quit"}};
     const std::string badge = ansi_bg(s.c.border_top) + "\x1b[30m";
     const std::string here = ansi_bg(s.c.focus) + "\x1b[30m";
     const std::string label = ansi_fg(s.c.list_fg);

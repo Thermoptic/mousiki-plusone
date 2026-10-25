@@ -3087,6 +3087,7 @@ void App::act_next() {
     // one), Queue-then-stop respected via play_next_from_queue() -- a manual skip still always actually skips, though: Repeat/Stop/Queue-then-stop only govern
     // *automatic* advance, not an explicit "next" press.
     if (!queue_.empty()) play_next_from_queue();
+    else if (settings_.play_mode == 2) play_relative_random();   // PlusOne: in shuffle mode "next" is a random track
     else play_relative(1);
 }
 
@@ -11874,8 +11875,8 @@ std::string App::render_frame(TerminalIO& term) {
     // Absolute move, no newline, one column short of the width -- it cannot scroll the screen.
     if (mode_ == Mode::Browse && term_rows_ >= 10) {
         struct Hint { const char* key; const char* label; };
-        static const Hint hints_music[] = {{"F1", "music"}, {"F2", "radio"}, {"F3", "books"}, {"F4", "wizard"}, {"F5", "settings"}, {"F6", "folders"}, {"F7", "queue"}, {"ESC ESC", "quit"}};
-        static const Hint hints_book[] = {{"F1", "music"}, {"F2", "radio"}, {"F3", "books"}, {"F4", "wizard"}, {"F5", "settings"}, {"ESC ESC", "quit"}};
+        static const Hint hints_music[] = {{"F1", "music"}, {"F2", "radio"}, {"F3", "books"}, {"F4", "wizard"}, {"F5", "settings"}, {"F6", "folders"}, {"F7", "queue"}, {"ESC", "quit"}};
+        static const Hint hints_book[] = {{"F1", "music"}, {"F2", "radio"}, {"F3", "books"}, {"F4", "wizard"}, {"F5", "settings"}, {"ESC", "quit"}};
         const Hint* hints = audiobook_ ? hints_book : hints_music;
         const size_t hint_count = audiobook_ ? sizeof(hints_book) / sizeof(hints_book[0]) : sizeof(hints_music) / sizeof(hints_music[0]);
         const int me = audiobook_ ? 2 : 0;
