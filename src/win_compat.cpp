@@ -25,6 +25,7 @@
 #include <chrono>
 #include <set>
 #include <vector>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cwchar>
@@ -276,6 +277,25 @@ bool win_console_init() {
     return g_con.vt_enabled;
 }
 
+void win_save_window_size() {
+    const char* home = std::getenv("MOUSIKI_HOME");
+    if (!home || !*home) return;
+    HWND con = GetConsoleWindow();
+    if (con) {   // in Windows Terminal this is a hidden pseudo window; its owner is the real window
+        HWND top = GetAncestor(con, GA_ROOTOWNER);
+        if ((top && IsZoomed(top)) || IsZoomed(con)) return;
+    }
+    CONSOLE_SCREEN_BUFFER_INFO info;
+    if (!GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &info)) return;
+    const int cols = info.srWindow.Right - info.srWindow.Left + 1;
+    const int rows = info.srWindow.Bottom - info.srWindow.Top + 1;
+    if (cols < 40 || rows < 12 || cols > 500 || rows > 300) return;
+    std::string path = home;
+    if (path.back() != '\\' && path.back() != '/') path += '\\';
+    path += "window_size.txt";
+    if (FILE* f = std::fopen(path.c_str(), "wb")) { std::fprintf(f, "%d,%d\n", cols, rows); std::fclose(f); }
+}
+
 void win_console_restore() {
     if (!g_initialized.load()) return;
     if (g_restored.exchange(true)) return;
@@ -477,6 +497,8 @@ int win_poll_key() {
         case VK_F1:    g_last_key_was_arrow = false; return kKeyF1;
         case VK_F2:    g_last_key_was_arrow = false; return kKeyF2;
         case VK_F3:    g_last_key_was_arrow = false; return kKeyF3;
+        case VK_F4:    g_last_key_was_arrow = false; return kKeyF4;
+        case VK_F5:    g_last_key_was_arrow = false; return kKeyF5;
         case VK_PRIOR: g_last_key_was_arrow = false; return kKeyPageUp;
         case VK_NEXT:  g_last_key_was_arrow = false; return kKeyPageDown;
         case VK_DELETE: g_last_key_was_arrow = false; g_last_key_was_shifted = shifted; return kKeyDelete;   // SHIFT+DEL: empty the fetch list

@@ -2,6 +2,8 @@ Mousiki PlusOne - changelog
 ===========================
 
 2026-10-25
+- The window size is remembered: when Mousiki quits it saves the size of the terminal window (not when maximized) to window_size.txt next to the launchers, and mousiki-wt.cmd opens the next window in that size (default 100 x 48).
+- Key legend on the bottom row of the music player / audio book player: F1 music, F2 radio, F3 books, F4 wizard, F5 settings, ESC ESC quit (the current mode is highlighted). F4 opens the help wizard, F5 the settings.
 - Radio Player: SHIFT+Up / Down = volume, SHIFT+Right / Left = next / previous channel (like the music player). The preset banks moved from SHIFT+Left / Right to ALT+Left / Right.
 - F1 / F2 / F3 jump straight to the Music Player / Radio Player / Audio Book Player (a mode that is switched off in Settings -> ON/OFF -> MODES is skipped with a note).
 - Pressing ESC twice in a row (within 0.8 s) in the main view quits the program. The first ESC still goes back to the home view.

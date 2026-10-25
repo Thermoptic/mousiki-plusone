@@ -120,6 +120,8 @@ constexpr int kKeyShiftDown = 327;
 constexpr int kKeyF1 = 328;
 constexpr int kKeyF2 = 329;
 constexpr int kKeyF3 = 330;
+constexpr int kKeyF4 = 331;   // help wizard
+constexpr int kKeyF5 = 332;   // settings
 
 // Name of the Alt key as shown in legends / the cheat sheet. The Mac keyboard
 // has no key called Alt -- the same key (the modifier the terminal reports as

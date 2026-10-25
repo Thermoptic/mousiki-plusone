@@ -4004,6 +4004,11 @@ void App::handle_key(int key) {
     // action individually.
     // SHIFT and the + key (the character '*' on a German keyboard): switch to the radio mode. Fixed key. Only here, in the
     // Browse view -- text fields and menus handled their keys above.
+    if (key == kKeyF4 || key == kKeyF5) {   // F4: the help wizard, F5: settings -- the same as their own keys
+        const auto hk = settings_.hotkeys.find(key == kKeyF4 ? "HKeyWizard" : "HKeySetting");
+        if (hk == settings_.hotkeys.end() || hotkey_string_to_key(hk->second) == 0) return;
+        key = hotkey_string_to_key(hk->second);
+    }
     if (key == kKeyF1 || key == kKeyF2 || key == kKeyF3) { request_mode_goto(key == kKeyF1 ? 0 : key == kKeyF2 ? 1 : 2); return; }
     if ((key == '*' || key == '_') && !last_key_was_arrow()) { request_mode_switch(key == '*' ? 1 : -1); return; }
     int lookup_key = (key == '\r') ? '\n' : key;
@@ -11782,6 +11787,26 @@ std::string App::render_frame(TerminalIO& term) {
         draw_floating_panel(floating, build_eq_panel(), kEqPanelWidth, W);
     }
     out += floating.str();
+    // PlusOne: the key legend on the terminal's last row (the one row the frame leaves blank): which F key goes where.
+    // Absolute move, no newline, one column short of the width -- it cannot scroll the screen.
+    if (mode_ == Mode::Browse && term_rows_ >= 10) {
+        struct Hint { const char* key; const char* label; };
+        static const Hint hints[] = {{"F1", "music"}, {"F2", "radio"}, {"F3", "books"}, {"F4", "wizard"}, {"F5", "settings"}, {"ESC ESC", "quit"}};
+        const int me = audiobook_ ? 2 : 0;
+        const std::string badge = bg_ansi_for(settings_.border_color) + "[30m";
+        const std::string here = bg_ansi_for(settings_.focus_color) + "[30m";
+        const std::string label = ansi_for(settings_.list_color, false);
+        std::string row;
+        int used = 0;
+        for (size_t i = 0; i < sizeof(hints) / sizeof(hints[0]); ++i) {
+            const std::string k = std::string(" ") + hints[i].key + " ";
+            const int w = display_width(k) + 1 + display_width(hints[i].label) + 3;
+            if (used + w > W - 2) break;
+            row += (i < 3 && static_cast<int>(i) * 1 == (me == 0 ? 0 : me == 2 ? 2 : -1) ? here : badge) + k + "[0m " + label + hints[i].label + "[0m   ";
+            used += w;
+        }
+        out += "[" + std::to_string(term_rows_) + ";2H[0m" + row + "[0m";
+    }
     if (gfx_.active) {
         const bool floating_mode = mode_ != Mode::Browse && mode_ != Mode::Search;
         const bool covered_all = list_overlay_active() || queue_overlay_active() || folder_overlay_active() || convert_overlay_active();

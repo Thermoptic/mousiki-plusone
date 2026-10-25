@@ -51,6 +51,11 @@ bool win_console_init();
 // Safe to call more than once and safe to call from the Ctrl+C handler.
 void win_console_restore();
 
+// PlusOne: writes the size of the terminal window (columns,rows) to <MOUSIKI_HOME>\window_size.txt so the launcher
+// (mousiki-wt.cmd) can open the next window the same size. Nothing is written when the window is maximised or
+// MOUSIKI_HOME is not set (the launchers set it).
+void win_save_window_size();
+
 // Raw-ish input mode, the counterpart of the termios ECHO/ICANON clearing on
 // POSIX. Input is actually read through _getch(), which is already
 // unbuffered and non-echoing, so this only has to deal with the output side

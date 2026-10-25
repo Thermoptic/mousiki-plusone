@@ -150,6 +150,7 @@ int main(int argc, char** argv) {
 #if defined(_WIN32)
     // App's TerminalIO destructor already left the alternate screen; this
     // puts the code pages and console modes back the way we found them.
+    muisc::win_save_window_size();
     muisc::win_console_restore();
 #endif
     return rc;
