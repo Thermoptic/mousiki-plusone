@@ -1,26 +1,94 @@
-Mousiki PlusOne - changelog
-===========================
+==============================================================================
+  MOUSIKI PLUSONE - CHANGELOG
+==============================================================================
 
-2026-10-25
-- The window size is remembered: when Mousiki quits it saves the size of the terminal window (not when maximized) to window_size.txt next to the launchers, and mousiki-wt.cmd opens the next window in that size (default 100 x 48).
-- Key legend on the bottom row of the music player / audio book player: F1 music, F2 radio, F3 books, F4 wizard, F5 settings, ESC ESC quit (the current mode is highlighted). F4 opens the help wizard, F5 the settings.
-- Radio Player: SHIFT+Up / Down = volume, SHIFT+Right / Left = next / previous channel (like the music player). The preset banks moved from SHIFT+Left / Right to ALT+Left / Right.
-- F1 / F2 / F3 jump straight to the Music Player / Radio Player / Audio Book Player (a mode that is switched off in Settings -> ON/OFF -> MODES is skipped with a note).
-- Pressing ESC twice in a row (within 0.8 s) in the main view quits the program. The first ESC still goes back to the home view.
-- New default playback keys (Settings > REFERENCE > Playback; rebindable as before):
-    Toggle Play / Pause  SPACE                 (was p)
-    Volume Up            SHIFT+ARROW_KEY_UP    (was +)
-    Volume Down          SHIFT+ARROW_KEY_DOWN  (was -)
-    Next Track           SHIFT+ARROW_KEY_RIGHT (was n)
-    Prev Track           SHIFT+ARROW_KEY_LEFT  (was b)
-  Shift+arrow combinations can now be bound: press them in a key field, or type e.g. SHIFT+UP.
-  Where a shifted arrow is not bound, it still acts as the plain arrow (big list / queue overlays keep SHIFT+Up/Down paging).
-- New list navigation keys (Settings > REFERENCE > Navigation & View, also in the cheat sheet):
-    Fast Navigate Up    PgUp   jump 10 rows up
-    Fast Navigate Down  PgDn   jump 10 rows down
-    Navigate Top        Home   jump to the first row
-    Navigate Bottom     End    jump to the last row
-  They work in the track list and in the queue, can be rebound (names PGUP / PGDN / HOME / END)
-  and are stored in config.txt (HKeyNavigateFastUp / FastDown / Top / Bottom).
-- Portable folder "Mousiki-Plus" with the launchers mousiki.cmd, mousiki-wt.cmd and lala.cmd.
-- mousiki-wt.cmd opens Windows Terminal with a roughly square window (100 x 48 characters).
+  Newest changes first. Every entry is grouped by area.
+  Key names: SHIFT+ARROW_KEY_UP is how config.txt writes Shift + Up arrow.
+
+
+==============================================================================
+  2026-10-25
+==============================================================================
+
+
+  KEYS: PLAYBACK
+  ------------------------------------------------------------------------
+
+  New default keys (Settings > REFERENCE > Playback). All of them can be
+  rebound as before.
+
+      Action                 New key                   Was
+      ---------------------  ------------------------  ---
+      Toggle Play / Pause    SPACE                     p
+      Volume Up              SHIFT+ARROW_KEY_UP        +
+      Volume Down            SHIFT+ARROW_KEY_DOWN      -
+      Next Track             SHIFT+ARROW_KEY_RIGHT     n
+      Prev Track             SHIFT+ARROW_KEY_LEFT      b
+
+  * Shift + arrow combinations can now be bound: press the combination in
+    a key field, or type for example SHIFT+UP.
+  * Where a shifted arrow is not bound to anything it still acts as the
+    plain arrow. The big list and queue overlays keep SHIFT+Up / Down for
+    paging.
+  * Radio Player: SHIFT+Up / Down changes the volume and SHIFT+Right /
+    Left tunes the next / previous channel, like in the music player. The
+    preset banks moved from SHIFT+Left / Right to ALT+Left / Right.
+
+
+  KEYS: NAVIGATION
+  ------------------------------------------------------------------------
+
+  New keys under Settings > REFERENCE > Navigation & View (also listed in
+  the cheat sheet):
+
+      Action                 Key       What it does
+      ---------------------  --------  ----------------------------------
+      Fast Navigate Up       PgUp      jump 10 rows up
+      Fast Navigate Down     PgDn      jump 10 rows down
+      Navigate Top           Home      jump to the first row
+      Navigate Bottom        End       jump to the last row
+
+  * They work in the track list and in the queue.
+  * They can be rebound (names PGUP / PGDN / HOME / END) and are stored in
+    config.txt as HKeyNavigateFastUp, HKeyNavigateFastDown,
+    HKeyNavigateTop and HKeyNavigateBottom.
+
+  ESC twice in a row (within 0.8 s) in the main view quits the program.
+  The first ESC still goes back to the home view.
+
+
+  MODES AND SCREENS
+  ------------------------------------------------------------------------
+
+  F1 / F2 / F3 jump straight to the Music Player / Radio Player / Audio
+  Book Player. A mode that is switched off under Settings > ON/OFF > MODES
+  is skipped with a short note.
+
+  F4 opens the help wizard and F5 opens the settings.
+
+  A key legend now fills the bottom row of the screen:
+
+      F1 music   F2 radio   F3 books   F4 wizard   F5 settings   ESC ESC quit
+
+  * It is drawn in the colours of the player and the mode you are in is
+    highlighted.
+  * It is shown in the Music Player, the Audio Book Player and the Radio
+    Player. In the radio the station lists give up one row for it.
+
+
+  WINDOW AND LAUNCHERS
+  ------------------------------------------------------------------------
+
+  Portable folder "Mousiki-Plus" with the three launchers mousiki.cmd,
+  mousiki-wt.cmd and lala.cmd.
+
+  mousiki-wt.cmd opens Windows Terminal in a roughly square window
+  (100 x 48 characters by default).
+
+  The window size is remembered. When Mousiki quits it saves the size of
+  the terminal window to window_size.txt next to the launchers, and
+  mousiki-wt.cmd opens the next window in that size.
+
+  * Nothing is saved when the window is maximized.
+  * Closing the window with the X button does not save the size; quit
+    with the keys.

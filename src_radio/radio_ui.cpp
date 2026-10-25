@@ -3583,6 +3583,25 @@ std::vector<std::string> build_scope_big(const Style& s, const UiModel& m, const
     return out;
 }
 
+// PlusOne: the key legend on the last row of the main screen (the same one the music player and the audio book player show).
+std::string build_key_legend(const Style& s, int W) {
+    struct Hint { const char* key; const char* label; };
+    static const Hint hints[] = {{"F1", "music"}, {"F2", "radio"}, {"F3", "books"}, {"F4", "wizard"}, {"F5", "settings"}, {"ESC ESC", "quit"}};
+    const std::string badge = ansi_bg(s.c.border_top) + "\x1b[30m";
+    const std::string here = ansi_bg(s.c.focus) + "\x1b[30m";
+    const std::string label = ansi_fg(s.c.list_fg);
+    std::string row = " ";
+    int used = 1;
+    for (size_t i = 0; i < sizeof(hints) / sizeof(hints[0]); ++i) {
+        const std::string k = std::string(" ") + hints[i].key + " ";
+        const int w = display_width(k) + 1 + display_width(hints[i].label) + 3;
+        if (used + w > W - 1) break;
+        row += (i == 1 ? here : badge) + k + kReset + " " + label + hints[i].label + kReset + "   ";
+        used += w;
+    }
+    return row + spaces(W - used);
+}
+
 std::vector<std::string> render_radio_frame_inner(const UiModel& m, const RadioStatus& st, RadioEngine& engine, const RadioSettings& cfg, bool peek) {
     Style s(cfg);
     std::vector<std::string> out;
@@ -3607,7 +3626,7 @@ std::vector<std::string> render_radio_frame_inner(const UiModel& m, const RadioS
     const int W = std::clamp(m.cols, kUiCols, kMaxCols);
     const int rows = std::max(m.rows, kUiRows);
     constexpr int kFixedRows = (kPanelH + 2) + 5 + 3;                 // info panel + band + search = 24
-    const int list_rows = std::max(4, rows - kFixedRows - 2);        // 2 = the list boxes' own borders
+    const int list_rows = std::max(4, rows - kFixedRows - 2 - 1);    // 2 = the list boxes' own borders, 1 = the key legend row
 
     // --- info panel (fixed height). Three blocks: ON AIR sign | station info (+ spectrum) | scope or sphere. A block
     // that is switched off (ON/OFF tab) is left out; the scope takes all the free width, and when it is off the
@@ -3681,6 +3700,7 @@ std::vector<std::string> render_radio_frame_inner(const UiModel& m, const RadioS
     // --- search, lists ---
     for (auto& l : build_search(s, m, st, W)) out.push_back(l);
     for (auto& l : build_lists(s, m, st, W, list_rows)) out.push_back(l);
+    out.push_back(build_key_legend(s, W));
     // The image sits on the scope block: its cell position (row 1 = under the top border) ...
     int scope_x = 0;
     if (spectro_img) {

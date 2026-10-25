@@ -11793,8 +11793,8 @@ std::string App::render_frame(TerminalIO& term) {
         struct Hint { const char* key; const char* label; };
         static const Hint hints[] = {{"F1", "music"}, {"F2", "radio"}, {"F3", "books"}, {"F4", "wizard"}, {"F5", "settings"}, {"ESC ESC", "quit"}};
         const int me = audiobook_ ? 2 : 0;
-        const std::string badge = bg_ansi_for(settings_.border_color) + "[30m";
-        const std::string here = bg_ansi_for(settings_.focus_color) + "[30m";
+        const std::string badge = bg_ansi_for(settings_.border_color) + "\x1b[30m";
+        const std::string here = bg_ansi_for(settings_.focus_color) + "\x1b[30m";
         const std::string label = ansi_for(settings_.list_color, false);
         std::string row;
         int used = 0;
@@ -11802,10 +11802,10 @@ std::string App::render_frame(TerminalIO& term) {
             const std::string k = std::string(" ") + hints[i].key + " ";
             const int w = display_width(k) + 1 + display_width(hints[i].label) + 3;
             if (used + w > W - 2) break;
-            row += (i < 3 && static_cast<int>(i) * 1 == (me == 0 ? 0 : me == 2 ? 2 : -1) ? here : badge) + k + "[0m " + label + hints[i].label + "[0m   ";
+            row += (i < 3 && static_cast<int>(i) * 1 == (me == 0 ? 0 : me == 2 ? 2 : -1) ? here : badge) + k + "\x1b[0m " + label + hints[i].label + "\x1b[0m   ";
             used += w;
         }
-        out += "[" + std::to_string(term_rows_) + ";2H[0m" + row + "[0m";
+        out += "\x1b[" + std::to_string(term_rows_) + ";2H\x1b[0m" + row + "\x1b[0m";
     }
     if (gfx_.active) {
         const bool floating_mode = mode_ != Mode::Browse && mode_ != Mode::Search;
