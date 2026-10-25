@@ -120,7 +120,8 @@ int main(int argc, char** argv) {
                 rc = radio_main(1, argv);
             }
             if (rc != kExitSwitchMode) break;
-            mode = muisc::next_mode_in(muisc::read_mode_config(), mode, g_mode_switch_dir);   // (the settings screens save before they switch)
+            if (g_mode_switch_target >= 0) { mode = g_mode_switch_target; g_mode_switch_target = -1; }
+            else mode = muisc::next_mode_in(muisc::read_mode_config(), mode, g_mode_switch_dir);   // (the settings screens save before they switch)
             rc = 0;
         }
         // quit from another mode: now the players really end (each saves, so it first takes over what the last one changed)

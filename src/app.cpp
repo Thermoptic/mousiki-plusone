@@ -2938,6 +2938,23 @@ void App::start_online_track(const OnlineResult& result) {
 // What the radio may have changed in config.txt while the player was suspended: Start Mode, Black Background, Share Profiles and,
 // with Share Profiles on, the oscilloscope / spectrogram settings (the radio writes its edits of them there).
 // SHIFT and + (dir = 1) / SHIFT and - (dir = -1): leave for the next / previous mode that is switched on.
+bool App::request_mode_goto(int target) {
+    const int me = audiobook_ ? 2 : 0;
+    if (target == me) return false;
+    if (!read_mode_config().use[target]) {
+        status_line_ = "that mode is switched off (Settings -> ON/OFF -> MODES)";
+        return false;
+    }
+    g_mode_switch_target = target;
+    if (audiobook_ && book_ask_due()) {   // leaving the audio book: the question about a bookmark first
+        book_ask_then("Switching mode", [this]() { switch_mode_ = true; quit_ = true; });
+        return true;
+    }
+    switch_mode_ = true;
+    quit_ = true;
+    return true;
+}
+
 bool App::request_mode_switch(int dir) {
     const int me = audiobook_ ? 2 : 0;
     if (settings_.next_mode(me, dir) == me) {
@@ -3987,6 +4004,7 @@ void App::handle_key(int key) {
     // action individually.
     // SHIFT and the + key (the character '*' on a German keyboard): switch to the radio mode. Fixed key. Only here, in the
     // Browse view -- text fields and menus handled their keys above.
+    if (key == kKeyF1 || key == kKeyF2 || key == kKeyF3) { request_mode_goto(key == kKeyF1 ? 0 : key == kKeyF2 ? 1 : 2); return; }
     if ((key == '*' || key == '_') && !last_key_was_arrow()) { request_mode_switch(key == '*' ? 1 : -1); return; }
     int lookup_key = (key == '\r') ? '\n' : key;
     std::string action = resolve_hotkey_action(lookup_key);

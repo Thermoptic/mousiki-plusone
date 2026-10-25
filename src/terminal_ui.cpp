@@ -476,7 +476,11 @@ int TerminalIO::poll_key() {
         // Without this the playlist editor's tab switch was unreachable there.
         if (seq[0] == 'b') { g_last_key_was_arrow = false; return kKeyAltLeft; }
         if (seq[0] == 'f') { g_last_key_was_arrow = false; return kKeyAltRight; }
-        if (read(STDIN_FILENO, &seq[1], 1) != 1) { g_last_key_was_arrow = false; return 27; }
+        if (seq[0] == 'O' && read(STDIN_FILENO, &seq[1], 1) == 1 && seq[1] >= 'P' && seq[1] <= 'R') {   // xterm SS3: F1..F3
+            g_last_key_was_arrow = false;
+            return seq[1] == 'P' ? kKeyF1 : seq[1] == 'Q' ? kKeyF2 : kKeyF3;
+        }
+        if (seq[0] != 'O' && read(STDIN_FILENO, &seq[1], 1) != 1) { g_last_key_was_arrow = false; return 27; }
         if (seq[0] == '[') {
             switch (seq[1]) {
                 case 'A': g_last_key_was_arrow = true; return 'A';

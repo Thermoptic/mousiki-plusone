@@ -116,6 +116,11 @@ constexpr int kKeyPageDown = 325;
 constexpr int kKeyShiftUp = 326;
 constexpr int kKeyShiftDown = 327;
 
+// F1 / F2 / F3: straight to the music player / radio / audio book player (PlusOne).
+constexpr int kKeyF1 = 328;
+constexpr int kKeyF2 = 329;
+constexpr int kKeyF3 = 330;
+
 // Name of the Alt key as shown in legends / the cheat sheet. The Mac keyboard
 // has no key called Alt -- the same key (the modifier the terminal reports as
 // "Alt/Meta") is labelled Option there. Chosen at compile time, so Windows and

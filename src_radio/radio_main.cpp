@@ -2505,11 +2505,27 @@ int radio_main(int argc, char** argv) {
                 ui.refilter(); ui.refilter_main_lists();
                 continue;
             }
-            if (k == kKeyShiftLeft || k == kKeyShiftRight) { ui.step_bank(k == kKeyShiftRight ? +1 : -1); continue; }   // main UI: previous / next preset
+            // PlusOne: the same keys as in the music player. SHIFT+Up / Down: volume, SHIFT+Right / Left: next / previous
+            // channel. The presets (banks) moved to ALT+Right / ALT+Left.
+            if (arrow && last_key_was_shifted() && (k == 'A' || k == 'B')) { engine.set_volume(engine.status().volume + (k == 'A' ? 5 : -5)); continue; }
+            if (k == kKeyShiftRight) { tune_relative(+1); continue; }
+            if (k == kKeyShiftLeft) { tune_back(); continue; }
+            if (k == kKeyAltLeft || k == kKeyAltRight) { ui.step_bank(k == kKeyAltRight ? +1 : -1); continue; }   // main UI: previous / next preset
             if (arrow) {   // Left / Right do nothing in the main UI any more (channels: n / b / # / presets)
                 if (k == 'A') ui.model.cursor = std::max(0, ui.model.cursor - 1);
                 else if (k == 'B') ui.model.cursor = std::min(std::max(0, nvis - 1), ui.model.cursor + 1);
                 continue;
+            }
+            if (k == kKeyF1 || k == kKeyF2 || k == kKeyF3) {   // F1 music player, F2 radio (here already), F3 audio book player
+                const int target = k == kKeyF1 ? 0 : k == kKeyF2 ? 1 : 2;
+                if (target == 1) continue;
+                if (!muisc::read_mode_config().use[target]) {
+                    ui.model.scope_notice = "that mode is switched off (Settings -> ON/OFF -> MODES)";
+                    ui.model.scope_notice_until = ui.model.t_sec + 4;
+                    continue;
+                }
+                g_mode_switch_target = target;
+                switch_mode = true; running = false; continue;
             }
             if (k == '*' || k == '_') {   // SHIFT and the + key ('*' on a German keyboard): the next mode; SHIFT and - ('_'): the previous one
                 const int dir = k == '*' ? 1 : -1;

@@ -2,6 +2,8 @@ Mousiki PlusOne - changelog
 ===========================
 
 2026-10-25
+- Radio Player: SHIFT+Up / Down = volume, SHIFT+Right / Left = next / previous channel (like the music player). The preset banks moved from SHIFT+Left / Right to ALT+Left / Right.
+- F1 / F2 / F3 jump straight to the Music Player / Radio Player / Audio Book Player (a mode that is switched off in Settings -> ON/OFF -> MODES is skipped with a note).
 - Pressing ESC twice in a row (within 0.8 s) in the main view quits the program. The first ESC still goes back to the home view.
 - New default playback keys (Settings > REFERENCE > Playback; rebindable as before):
     Toggle Play / Pause  SPACE                 (was p)

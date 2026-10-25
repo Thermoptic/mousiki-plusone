@@ -1950,6 +1950,7 @@ private:
     void exclude_book_files(std::vector<LocalTrack>& tracks) const;   // the music player's library leaves out what lies in the audio book folder
     void book_totals(double elapsed, double& total, double& done, bool& complete) const;   // length of the book / listened so far (sums the known chapter lengths)
     void book_poll();                         // render loop: the tags of the loaded chapter, a running save
+    bool request_mode_goto(int target);   // F1 / F2 / F3: straight to the music player / radio / audio book player
     bool request_mode_switch(int dir);   // SHIFT and + / SHIFT and -: leave for the next / previous mode (false: no other mode is on)
     void sync_after_radio();         // adopt what the radio changed in config.txt meanwhile
     void remote_poll();              // commands from outside + the status file; called every frame
