@@ -1,0 +1,22 @@
+Mousiki PlusOne - changelog
+===========================
+
+2026-10-25
+- Pressing ESC twice in a row (within 0.8 s) in the main view quits the program. The first ESC still goes back to the home view.
+- New default playback keys (Settings > REFERENCE > Playback; rebindable as before):
+    Toggle Play / Pause  SPACE                 (was p)
+    Volume Up            SHIFT+ARROW_KEY_UP    (was +)
+    Volume Down          SHIFT+ARROW_KEY_DOWN  (was -)
+    Next Track           SHIFT+ARROW_KEY_RIGHT (was n)
+    Prev Track           SHIFT+ARROW_KEY_LEFT  (was b)
+  Shift+arrow combinations can now be bound: press them in a key field, or type e.g. SHIFT+UP.
+  Where a shifted arrow is not bound, it still acts as the plain arrow (big list / queue overlays keep SHIFT+Up/Down paging).
+- New list navigation keys (Settings > REFERENCE > Navigation & View, also in the cheat sheet):
+    Fast Navigate Up    PgUp   jump 10 rows up
+    Fast Navigate Down  PgDn   jump 10 rows down
+    Navigate Top        Home   jump to the first row
+    Navigate Bottom     End    jump to the last row
+  They work in the track list and in the queue, can be rebound (names PGUP / PGDN / HOME / END)
+  and are stored in config.txt (HKeyNavigateFastUp / FastDown / Top / Bottom).
+- Portable folder "Mousiki-Plus" with the launchers mousiki.cmd, mousiki-wt.cmd and lala.cmd.
+- mousiki-wt.cmd opens Windows Terminal with a roughly square window (100 x 48 characters).

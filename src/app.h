@@ -829,6 +829,7 @@ private:
 
     std::string status_line_;
     bool quit_ = false;
+    std::chrono::steady_clock::time_point last_esc_home_{};   // ESC twice in a row (home view first, then within a moment) quits
     // Settings screen: the settings as they were when it opened. `s` saves and closes, ESC / q puts them back (discard).
     Settings settings_snapshot_;
     std::string settings_snapshot_text_;

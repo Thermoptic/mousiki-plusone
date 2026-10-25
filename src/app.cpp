@@ -760,10 +760,21 @@ App::App(Settings* shared, bool audiobook) : audiobook_(audiobook), settings_(sh
 struct NamedComboKey { const char* name; int code; };
 static const NamedComboKey kComboKeys[] = {
     {"ALT+L", kKeyAltL}, {"CTRL+L", kKeyCtrlL}, {"CTRL+SHIFT+U", kKeyCtrlShiftU}, {"CTRL+SHIFT+Z", kKeyCtrlShiftZ},
+    {"SHIFT+ARROW_KEY_UP", kKeyShiftUp}, {"SHIFT+ARROW_KEY_DOWN", kKeyShiftDown},
+    {"SHIFT+ARROW_KEY_LEFT", kKeyShiftLeft}, {"SHIFT+ARROW_KEY_RIGHT", kKeyShiftRight},
+    {"PGUP", kKeyPageUp}, {"PGDN", kKeyPageDown}, {"HOME", kKeyHome}, {"END", kKeyEnd},
 };
+
+// SHIFT+Up / SHIFT+Down arrive as the plain arrow 'A' / 'B' with the shift flag set; this is the bindable code for them
+// (0 for every other key).
+static int shifted_arrow_code(int key) {
+    if ((key != 'A' && key != 'B') || !last_key_was_arrow() || !last_key_was_shifted()) return 0;
+    return key == 'A' ? kKeyShiftUp : kKeyShiftDown;
+}
 
 // "" when `key` is not one of the bindable combinations.
 std::string combo_key_name(int key) {
+    if (const int sa = shifted_arrow_code(key)) key = sa;
     for (const auto& c : kComboKeys) if (c.code == key) return c.name;
     return "";
 }
@@ -779,6 +790,12 @@ std::string normalize_hotkey_string(std::string s) {
     if (s == "LEFT") return "ARROW_KEY_LEFT";
     if (s == "RIGHT") return "ARROW_KEY_RIGHT";
     if (s == "RETURN") return "ENTER";
+    if (s == "SHIFT+UP") return "SHIFT+ARROW_KEY_UP";
+    if (s == "SHIFT+DOWN") return "SHIFT+ARROW_KEY_DOWN";
+    if (s == "SHIFT+LEFT") return "SHIFT+ARROW_KEY_LEFT";
+    if (s == "SHIFT+RIGHT") return "SHIFT+ARROW_KEY_RIGHT";
+    if (s == "PAGEUP" || s == "PAGE_UP") return "PGUP";
+    if (s == "PAGEDOWN" || s == "PAGE_DOWN") return "PGDN";
     if (s == "ESCAPE") return "ESC";
     return s;
 }
@@ -801,6 +818,7 @@ int App::hotkey_string_to_key(const std::string& s) {
 bool App::key_is(const char* action, int key) const {
     const auto it = settings_.hotkeys.find(action);
     if (it == settings_.hotkeys.end() || it->second.empty()) return false;
+    if (const int sa = shifted_arrow_code(key)) { if (hotkey_string_to_key(it->second) == sa) return true; }
     if (hotkey_string_to_key(it->second) != key) return false;
     // The arrows travel as 'A'..'D' (see resolve_hotkey_action()): a typed capital and an arrow are told apart here.
     if (key >= 'A' && key <= 'D') return last_key_was_arrow() == (it->second.rfind("ARROW_KEY_", 0) == 0);
@@ -811,6 +829,11 @@ std::string App::resolve_hotkey_action(int key) const {
     // The arrow keys travel as the letters 'A'..'D', so a typed SHIFT+a..d is the same int as an arrow. The input
     // layer says which one it was; an arrow only matches ARROW_KEY_* bindings and a typed letter only the others.
     // (Without this, SHIFT+c read as Right and seeked forward, and a binding on "C" fired on the Right arrow.)
+    // SHIFT+Up / SHIFT+Down bound to an action win over the plain arrow; unbound, they act as the plain arrow as before.
+    if (const int sa = shifted_arrow_code(key)) {
+        for (const auto& [action, key_str] : settings_.hotkeys)
+            if (hotkey_string_to_key(key_str) == sa) return action;
+    }
     const bool ambiguous = key >= 'A' && key <= 'D';
     const bool was_arrow = ambiguous && last_key_was_arrow();
     for (const auto& [action, key_str] : settings_.hotkeys) {
@@ -4083,6 +4106,20 @@ void App::handle_key(int key) {
             // invisible below row 8 instead of the list scrolling up.
             if (selected_ >= scroll_ + list_nav_rows()) scroll_ = selected_ - list_nav_rows() + 1;
         }
+    } else if (action == "HKeyNavigateFastUp" || action == "HKeyNavigateFastDown" ||
+               action == "HKeyNavigateTop" || action == "HKeyNavigateBottom") { // PgUp / PgDn: 10 rows, Home / End: first / last row
+        const int step = action == "HKeyNavigateFastUp" ? -10 : action == "HKeyNavigateFastDown" ? 10 : 0;
+        const bool to_top = action == "HKeyNavigateTop";
+        if (queue_focus_) {
+            const int last = std::max(0, static_cast<int>(queue_.size()) - 1);
+            queue_selected_ = step != 0 ? std::clamp(queue_selected_ + step, 0, last) : to_top ? 0 : last;
+            clamp_queue_selected();
+        } else if (list_len > 0) {
+            const int last = static_cast<int>(list_len) - 1;
+            selected_ = step != 0 ? std::clamp(selected_ + step, 0, last) : to_top ? 0 : last;
+            if (selected_ < scroll_) scroll_ = selected_;
+            if (selected_ >= scroll_ + list_nav_rows()) scroll_ = selected_ - list_nav_rows() + 1;
+        }
     } else if (action == "HKeySeekForward") {
         if (has_track_) player_.seek_relative(5.0);
     } else if (action == "HKeySeekBackward") {
@@ -4315,6 +4352,10 @@ void App::handle_key(int key) {
         // to be rebound (see the SYSTEM (MAIN UI) section of
         // the cheat sheet, '?', which is where fixed keys like this one
         // are documented -- the Reference tab only lists rebindable ones).
+        // PlusOne: a second ESC right after this one quits the program.
+        const auto now = std::chrono::steady_clock::now();
+        if (now - last_esc_home_ < std::chrono::milliseconds(800)) { quit_ = true; return; }
+        last_esc_home_ = now;
         list_source_ = ListSource::Local;
         last_local_query_.clear();
         folder_filter_.clear();

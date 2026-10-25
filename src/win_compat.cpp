@@ -474,6 +474,8 @@ int win_poll_key() {
                        g_last_key_was_arrow = true; return 'D';
         case VK_HOME:  g_last_key_was_arrow = false; return kKeyHome;
         case VK_END:   g_last_key_was_arrow = false; return kKeyEnd;
+        case VK_PRIOR: g_last_key_was_arrow = false; return kKeyPageUp;
+        case VK_NEXT:  g_last_key_was_arrow = false; return kKeyPageDown;
         case VK_DELETE: g_last_key_was_arrow = false; g_last_key_was_shifted = shifted; return kKeyDelete;   // SHIFT+DEL: empty the fetch list
         default: break;
     }

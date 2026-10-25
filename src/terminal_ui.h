@@ -106,6 +106,16 @@ constexpr int kKeyCtrlRight = 321;
 constexpr int kKeyCtrlShiftLeft = 322;
 constexpr int kKeyCtrlShiftRight = 323;
 
+// PageUp / PageDown (VK_PRIOR / VK_NEXT, xterm "ESC [ 5 ~" / "ESC [ 6 ~"): jump a page in the lists. Bindable (PGUP / PGDN).
+constexpr int kKeyPageUp = 324;
+constexpr int kKeyPageDown = 325;
+
+// SHIFT+Up / SHIFT+Down are reported by the readers as the plain arrow with last_key_was_shifted() set. These two codes
+// never come out of the key readers; App maps that pair onto them so the pair can be bound like any other key
+// (SHIFT+ARROW_KEY_UP / SHIFT+ARROW_KEY_DOWN). SHIFT+Left / Right have their own sentinels (kKeyShiftLeft / Right).
+constexpr int kKeyShiftUp = 326;
+constexpr int kKeyShiftDown = 327;
+
 // Name of the Alt key as shown in legends / the cheat sheet. The Mac keyboard
 // has no key called Alt -- the same key (the modifier the terminal reports as
 // "Alt/Meta") is labelled Option there. Chosen at compile time, so Windows and

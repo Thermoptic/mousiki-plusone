@@ -485,6 +485,18 @@ int TerminalIO::poll_key() {
                 case 'D': g_last_key_was_arrow = true; return 'D';
                 case 'H': g_last_key_was_arrow = false; return kKeyHome; // most xterm-likes send ESC [ H for Home
                 case 'F': g_last_key_was_arrow = false; return kKeyEnd;  // ...and ESC [ F for End
+                case '5': case '6': { // ESC [ 5 ~ -- PageUp, ESC [ 6 ~ -- PageDown (also with modifiers: ESC [ 5 ; <mod> ~)
+                    unsigned char tail = 0;
+                    g_last_key_was_arrow = false;
+                    if (read(STDIN_FILENO, &tail, 1) != 1) return 27;
+                    if (tail == ';') {
+                        unsigned char c = 0;
+                        while (read(STDIN_FILENO, &c, 1) == 1 && c >= '0' && c <= '9') {}
+                        tail = c;
+                    }
+                    if (tail == '~') return seq[1] == '5' ? kKeyPageUp : kKeyPageDown;
+                    return 27;
+                }
                 case '3': { // ESC [ 3 ~ -- Delete key; ESC [ 3 ; <mod> ~ -- with modifiers (Shift+Delete: mod 2)
                     unsigned char tail = 0;
                     g_last_key_was_arrow = false;

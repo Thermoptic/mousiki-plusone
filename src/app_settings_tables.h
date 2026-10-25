@@ -27,6 +27,10 @@ inline const RefHotkeyRow kRefRows[] = {
     // --- Navigation & View ---
     {"NAVIGATION & VIEW", "HKeyNavigateUp", "Navigate Up"},
     {nullptr, "HKeyNavigateDown", "Navigate Down"},
+    {nullptr, "HKeyNavigateFastUp", "Fast Navigate Up"},     // 10 rows up
+    {nullptr, "HKeyNavigateFastDown", "Fast Navigate Down"}, // 10 rows down
+    {nullptr, "HKeyNavigateTop", "Navigate Top"},            // first row
+    {nullptr, "HKeyNavigateBottom", "Navigate Bottom"},      // last row
     {nullptr, "HKeySwitchBetweenCards", "Switch Cards"},
     {nullptr, "HKeyFilterForFolder", "Filter By Folder"},
     {nullptr, "HKeyClearFilter", "Clear Filter"},

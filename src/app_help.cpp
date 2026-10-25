@@ -225,6 +225,10 @@ void App::build_cheatsheet_screen(std::ostringstream& frame, int W) const {
         // --- Navigation & View: moving around the lists and what they show ---
         {"NAVIGATION & VIEW (MAIN UI)", "HKeyNavigateUp", "Explore list (up)"},
         {nullptr, "HKeyNavigateDown", "Explore list (down)"},
+        {nullptr, "HKeyNavigateFastUp", "Explore list 10 rows up"},
+        {nullptr, "HKeyNavigateFastDown", "Explore list 10 rows down"},
+        {nullptr, "HKeyNavigateTop", "Jump to the first row"},
+        {nullptr, "HKeyNavigateBottom", "Jump to the last row"},
         {nullptr, "HKeySwitchBetweenCards", "Switch between panels (list / queue)"},
         {nullptr, "HKeyFilterForFolder", "Filter by folder"},
         {nullptr, "HKeyClearFilter", "Clear filter"},
