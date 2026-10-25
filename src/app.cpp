@@ -752,6 +752,7 @@ App::App(Settings* shared, bool audiobook) : audiobook_(audiobook), settings_(sh
     if (audiobook_) book_refresh_view();   // the left pane lists the books
     launch_row_meta_resolver();
     start_device_worker();
+    fx_load_state();   // PlusOne: the FOLDERS pane comes back the way it was left
 }
 
 
@@ -4004,6 +4005,7 @@ void App::handle_key(int key) {
     // action individually.
     // SHIFT and the + key (the character '*' on a German keyboard): switch to the radio mode. Fixed key. Only here, in the
     // Browse view -- text fields and menus handled their keys above.
+    if ((key == kKeyF6 || key == kKeyF7) && !audiobook_) { fx_set_pane(key == kKeyF6); return; }   // F6 folders, F7 queue
     if (key == kKeyF4 || key == kKeyF5) {   // F4: the help wizard, F5: settings -- the same as their own keys
         const auto hk = settings_.hotkeys.find(key == kKeyF4 ? "HKeyWizard" : "HKeySetting");
         if (hk == settings_.hotkeys.end() || hotkey_string_to_key(hk->second) == 0) return;
@@ -4016,6 +4018,7 @@ void App::handle_key(int key) {
     if (action.empty() && lookup_key >= 'a' && lookup_key <= 'z') action = resolve_hotkey_action(lookup_key - 32);
     if (action.empty() && lookup_key >= 'A' && lookup_key <= 'Z') action = resolve_hotkey_action(lookup_key + 32);
     if (audiobook_ && book_intercept(action, key)) return;   // the audio book player's own keys (and what it does not offer)
+    if (!audiobook_ && folders_pane_ && queue_focus_ && !list_overlay_active() && !queue_overlay_active() && fx_key(action, key)) return;   // the FOLDERS pane has the keys
 
     if (action == "HKeyRescan") {   // SHIFT+r: new files copied / uploaded while the app runs
         rescan_now();
@@ -5829,6 +5832,7 @@ std::vector<std::string> App::build_list_panel(int total_width, int height) cons
 
 std::vector<std::string> App::build_queue_panel(int total_width, int height, bool wide_artist) const {
     if (audiobook_) return build_chapter_panel(total_width, height);   // (the audio book player has chapters instead of a queue)
+    if (folders_pane_ && !wide_artist) return build_folders_panel(total_width, height);   // PlusOne: F6 shows the folders in its place
     int inner = total_width - 4;
     std::string border_ansi = ansi_for(settings_.border_color, false);
     std::string border_ansi_bottom = ansi_for(settings_.border_color_bottom, false);
@@ -5898,6 +5902,61 @@ std::vector<std::string> App::build_queue_panel(int total_width, int height, boo
     // Like the LOCAL AUDIO pane: how many titles are below the visible rows.
     std::string footer;
     const int remaining = static_cast<int>(queue_.size()) - (queue_scroll_ + height);
+    if (remaining > 0) footer = "( " + std::to_string(remaining) + " more )";
+    out.push_back(box_bottom(total_width, footer, border_ansi_bottom));
+    return out;
+}
+
+// PlusOne: the FOLDERS pane (F6), drawn like the queue pane. See app_folders.cpp.
+std::vector<std::string> App::build_folders_panel(int total_width, int height) const {
+    const int inner = total_width - 4;
+    const std::string border_ansi = ansi_for(settings_.border_color, false);
+    const std::string border_ansi_bottom = ansi_for(settings_.border_color_bottom, false);
+    const std::string reset = "\x1b[0m";
+    const std::string bar = border_ansi + settings_.box_vertical + reset;
+    std::vector<std::string> out;
+    std::string title = "FOLDERS";
+    if (!fx_dir_.empty()) {
+        const fs::path d = path_from_utf8(fx_dir_);
+        title += ": " + (d.parent_path().filename().empty() ? std::string() : path_utf8(d.parent_path().filename()) + "/") + path_utf8(d.filename());
+    }
+    if (display_width(title) > inner - 4) title = truncate_str(title, std::max(8, inner - 4));
+    if (queue_focus_) title += focus_indicator(settings_, border_ansi);
+    out.push_back(box_top(title, total_width, border_ansi));
+
+    const auto& es = fx_entries();
+    if (es.empty()) {
+        for (int row = 0; row < height; ++row) {
+            std::string content;
+            if (row == height / 2) {
+                const std::string text = apply_font_map(fx_dir_.empty() ? "ADD A LOCAL PATH IN SETTINGS" : "NO FOLDERS HERE", settings_.font_map);
+                content = std::string(std::max(0, (inner - display_width(text)) / 2), ' ') + text;
+            }
+            out.push_back(bar + " " + ansi_for(settings_.queue_color, false) + pad_right(truncate_str(content, inner), inner) + reset + " " + bar);
+        }
+    } else {
+        for (int row = 0; row < height; ++row) {
+            const int idx = fx_scroll_ + row;
+            std::string content;
+            bool shown = false, hovering = false;
+            if (idx < static_cast<int>(es.size())) {
+                const FxEntry& e = es[static_cast<size_t>(idx)];
+                const std::string count = std::to_string(e.total);
+                const int name_w = std::max(4, inner - static_cast<int>(count.size()) - 2);
+                content = pad_right(truncate_str(apply_font_map((e.subs > 0 ? "> " : "  ") + e.name, settings_.font_map), name_w), name_w) + "  " + count;
+                shown = !folder_filter_.empty() && e.filter == folder_filter_;
+                hovering = queue_focus_ && idx == fx_selected_;
+            }
+            const std::string padded = pad_right(truncate_str(content, inner), inner);
+            std::string color_ansi;
+            if (hovering) color_ansi = cursor_sgr(settings_.queue_cursor_color, settings_.queue_cursor_bg_color);
+            else if (shown) color_ansi = ansi_for(settings_.queue_playing_color, true) + bg_ansi_for(settings_.queue_playing_bg_color);
+            else color_ansi = ansi_for(settings_.queue_color, false) + bg_ansi_for(settings_.queue_inactive_bg_color);
+            out.push_back(bar + " " + color_ansi + padded + reset + " " + bar);
+        }
+    }
+    std::string footer;
+    const int remaining = static_cast<int>(es.size()) - (fx_scroll_ + height);
     if (remaining > 0) footer = "( " + std::to_string(remaining) + " more )";
     out.push_back(box_bottom(total_width, footer, border_ansi_bottom));
     return out;
@@ -11265,7 +11324,7 @@ std::string App::render_frame(TerminalIO& term) {
     // off -- the terminal did, one line later than expected. Lowering the
     // floor so the app actually renders to the real width instead of
     // always assuming at least 80 columns are available.
-    int W = std::clamp(term_cols, 40, 200);
+    int W = std::clamp(term_cols, 40, 400);   // PlusOne: was 200 -- a wide window is filled to its right edge
 
     // Real terminal row count -- see term_rows_'s comment in app.h for
     // the full story on why this now actually gets consulted. rows()
@@ -11791,14 +11850,17 @@ std::string App::render_frame(TerminalIO& term) {
     // Absolute move, no newline, one column short of the width -- it cannot scroll the screen.
     if (mode_ == Mode::Browse && term_rows_ >= 10) {
         struct Hint { const char* key; const char* label; };
-        static const Hint hints[] = {{"F1", "music"}, {"F2", "radio"}, {"F3", "books"}, {"F4", "wizard"}, {"F5", "settings"}, {"ESC ESC", "quit"}};
+        static const Hint hints_music[] = {{"F1", "music"}, {"F2", "radio"}, {"F3", "books"}, {"F4", "wizard"}, {"F5", "settings"}, {"F6", "folders"}, {"F7", "queue"}, {"ESC ESC", "quit"}};
+        static const Hint hints_book[] = {{"F1", "music"}, {"F2", "radio"}, {"F3", "books"}, {"F4", "wizard"}, {"F5", "settings"}, {"ESC ESC", "quit"}};
+        const Hint* hints = audiobook_ ? hints_book : hints_music;
+        const size_t hint_count = audiobook_ ? sizeof(hints_book) / sizeof(hints_book[0]) : sizeof(hints_music) / sizeof(hints_music[0]);
         const int me = audiobook_ ? 2 : 0;
         const std::string badge = bg_ansi_for(settings_.border_color) + "\x1b[30m";
         const std::string here = bg_ansi_for(settings_.focus_color) + "\x1b[30m";
         const std::string label = ansi_for(settings_.list_color, false);
         std::string row;
         int used = 0;
-        for (size_t i = 0; i < sizeof(hints) / sizeof(hints[0]); ++i) {
+        for (size_t i = 0; i < hint_count; ++i) {
             const std::string k = std::string(" ") + hints[i].key + " ";
             const int w = display_width(k) + 1 + display_width(hints[i].label) + 3;
             if (used + w > W - 2) break;

@@ -280,20 +280,34 @@ bool win_console_init() {
 void win_save_window_size() {
     const char* home = std::getenv("MOUSIKI_HOME");
     if (!home || !*home) return;
+    std::string dir = home;
+    if (dir.back() != '\\' && dir.back() != '/') dir += '\\';
+    // window_state.txt: "max" (maximised), "full" (full screen) or "normal". In the first two cases window_size.txt keeps the
+    // size from before, so leaving the maximised / full screen state brings that size back.
+    std::string state = "normal";
     HWND con = GetConsoleWindow();
     if (con) {   // in Windows Terminal this is a hidden pseudo window; its owner is the real window
         HWND top = GetAncestor(con, GA_ROOTOWNER);
-        if ((top && IsZoomed(top)) || IsZoomed(con)) return;
+        if (!top) top = con;
+        RECT wr{};
+        const LONG style = GetWindowLongW(top, GWL_STYLE);
+        if (GetWindowRect(top, &wr)) {
+            MONITORINFO mi{}; mi.cbSize = sizeof mi;
+            const bool covers = GetMonitorInfoW(MonitorFromWindow(top, MONITOR_DEFAULTTONEAREST), &mi) &&
+                                wr.left <= mi.rcMonitor.left && wr.top <= mi.rcMonitor.top &&
+                                wr.right >= mi.rcMonitor.right && wr.bottom >= mi.rcMonitor.bottom;
+            if (covers && !(style & WS_CAPTION)) state = "full";
+            else if (IsZoomed(top)) state = "max";
+        }
     }
+    if (FILE* f = std::fopen((dir + "window_state.txt").c_str(), "wb")) { std::fprintf(f, "%s" "\n", state.c_str()); std::fclose(f); }
+    if (state != "normal") return;
     CONSOLE_SCREEN_BUFFER_INFO info;
     if (!GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &info)) return;
     const int cols = info.srWindow.Right - info.srWindow.Left + 1;
     const int rows = info.srWindow.Bottom - info.srWindow.Top + 1;
     if (cols < 40 || rows < 12 || cols > 500 || rows > 300) return;
-    std::string path = home;
-    if (path.back() != '\\' && path.back() != '/') path += '\\';
-    path += "window_size.txt";
-    if (FILE* f = std::fopen(path.c_str(), "wb")) { std::fprintf(f, "%d,%d\n", cols, rows); std::fclose(f); }
+    if (FILE* f = std::fopen((dir + "window_size.txt").c_str(), "wb")) { std::fprintf(f, "%d,%d" "\n", cols, rows); std::fclose(f); }
 }
 
 void win_console_restore() {
@@ -499,6 +513,8 @@ int win_poll_key() {
         case VK_F3:    g_last_key_was_arrow = false; return kKeyF3;
         case VK_F4:    g_last_key_was_arrow = false; return kKeyF4;
         case VK_F5:    g_last_key_was_arrow = false; return kKeyF5;
+        case VK_F6:    g_last_key_was_arrow = false; return kKeyF6;
+        case VK_F7:    g_last_key_was_arrow = false; return kKeyF7;
         case VK_PRIOR: g_last_key_was_arrow = false; return kKeyPageUp;
         case VK_NEXT:  g_last_key_was_arrow = false; return kKeyPageDown;
         case VK_DELETE: g_last_key_was_arrow = false; g_last_key_was_shifted = shifted; return kKeyDelete;   // SHIFT+DEL: empty the fetch list

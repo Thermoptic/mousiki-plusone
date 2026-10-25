@@ -34,7 +34,7 @@ namespace muisc::radio {
 // band, buttons and search keep their height.
 constexpr int kUiCols = 120;
 constexpr int kUiRows = 30;
-constexpr int kMaxCols = 200;
+constexpr int kMaxCols = 400;   // PlusOne: was 200 -- a wide window is filled to its right edge
 
 // Colour wave over the ON AIR sign. The sign always carries a top-left -> bottom-right gradient of
 // the visualizer colours; this adds a travelling wave on top. Meant to become settings later.

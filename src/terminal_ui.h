@@ -122,6 +122,8 @@ constexpr int kKeyF2 = 329;
 constexpr int kKeyF3 = 330;
 constexpr int kKeyF4 = 331;   // help wizard
 constexpr int kKeyF5 = 332;   // settings
+constexpr int kKeyF6 = 333;   // folders pane
+constexpr int kKeyF7 = 334;   // queue pane
 
 // Name of the Alt key as shown in legends / the cheat sheet. The Mac keyboard
 // has no key called Alt -- the same key (the modifier the terminal reports as

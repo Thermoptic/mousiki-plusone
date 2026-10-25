@@ -57,6 +57,26 @@
   The first ESC still goes back to the home view.
 
 
+  FOLDERS PANE (Music Player)
+  ------------------------------------------------------------------------
+
+  F6 swaps the QUEUE pane for a FOLDERS pane, F7 brings the queue back. The
+  last choice is remembered (plusone_state.txt next to config.txt).
+
+  The FOLDERS pane is a small file explorer over the local music paths
+  (Settings > PATHS > Local Path):
+
+  * Only folders with music files in them or below them are listed, with
+    the number of files in each.
+  * ENTER on a folder lists the music files lying directly in it in the
+    LOCAL AUDIO FILES pane. If the folder holds more folders, the pane goes
+    into it and shows those instead (a ">" marks such a folder).
+  * BACKSPACE goes one step back; at the top level the paths themselves
+    are shown.
+  * TAB moves the keys between the track list and the FOLDERS pane. Up,
+    Down, PgUp, PgDn, Home and End work as in the lists.
+
+
   MODES AND SCREENS
   ------------------------------------------------------------------------
 
@@ -68,12 +88,14 @@
 
   A key legend now fills the bottom row of the screen:
 
-      F1 music   F2 radio   F3 books   F4 wizard   F5 settings   ESC ESC quit
+      F1 music   F2 radio   F3 books   F4 wizard   F5 settings
+      F6 folders   F7 queue   ESC ESC quit
 
   * It is drawn in the colours of the player and the mode you are in is
     highlighted.
   * It is shown in the Music Player, the Audio Book Player and the Radio
     Player. In the radio the station lists give up one row for it.
+  * F6 / F7 (folders / queue) only exist in the Music Player.
 
 
   WINDOW AND LAUNCHERS
@@ -89,6 +111,12 @@
   the terminal window to window_size.txt next to the launchers, and
   mousiki-wt.cmd opens the next window in that size.
 
-  * Nothing is saved when the window is maximized.
+  * Maximized and full screen are remembered too (window_state.txt): if
+    Mousiki was closed maximized or in full screen it starts that way. The
+    normal size from before is kept, so leaving maximized brings it back.
   * Closing the window with the X button does not save the size; quit
     with the keys.
+
+  The screen now uses the full width of wide windows. The layout used to
+  stop at 200 columns and leave an empty strip on the right; it now goes
+  up to 400 columns in all three players.

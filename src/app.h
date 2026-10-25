@@ -361,6 +361,32 @@ private:
     bool search_nav_moved_ = false;   // Up/Down used in the search box: ENTER then plays the highlighted entry
     bool queue_focus_ = false; // Tab toggles which panel Up/Down navigates
 
+    // --- PlusOne: the FOLDERS pane (F6) in the place of the queue (F7), see app_folders.cpp ---
+    struct FxEntry {
+        std::string name;     // folder name
+        std::string path;     // the folder (the key of the next level)
+        std::string filter;   // folder_filter_ value that lists the files lying directly in it ("" = none)
+        int direct = 0;       // music files lying directly in it
+        int subs = 0;         // folders below it that hold music
+        int total = 0;        // music files in it and below it
+    };
+    bool folders_pane_ = false;
+    std::string fx_dir_;      // the folder whose subfolders are shown ("" = the local music paths themselves)
+    int fx_selected_ = 0;
+    int fx_scroll_ = 0;
+    mutable std::vector<FxEntry> fx_entries_;
+    mutable std::string fx_key_;
+    const std::vector<FxEntry>& fx_entries() const;
+    std::vector<std::string> fx_roots() const;
+    void fx_follow();
+    void fx_open();
+    void fx_back();
+    void fx_set_pane(bool on);
+    bool fx_key(const std::string& action, int key);
+    void fx_save_state() const;
+    void fx_load_state();
+    std::vector<std::string> build_folders_panel(int total_width, int height) const;
+
     // "!" (HKeyQueueLock): a LOCKED queue (the default) keeps its tracks when
     // they are played: the played track moves to the END of the queue (also
     // for "n"), so the queue loops instead of draining. UNLOCKED, a played
