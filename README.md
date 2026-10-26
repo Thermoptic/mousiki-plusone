@@ -22,6 +22,119 @@
 [![Windows](https://img.shields.io/badge/Windows-x64-0078D4.svg?logo=windows&logoColor=white)](https://github.com/StSchwerdtfeger/mousiki-plus/tree/main) [![Linux](https://img.shields.io/badge/Linux-x64-FCC624.svg?logo=linux&logoColor=black)](https://github.com/StSchwerdtfeger/mousiki-plus/tree/main) [![macOS](https://img.shields.io/badge/macOS-x64-000000.svg?logo=apple&logoColor=white)](https://github.com/StSchwerdtfeger/mousiki-plus/tree/main)
 </div>
 
+<!-- PLUSONE-CHANGELOG-START (mirrors plusone_changelog.txt) -->
+<h2 align="center">🚀 Mousiki PlusOne — what's new</h2>
+
+<p align="center">
+  <i>Changes made on top of Mousiki Plus in this fork, newest first.<br>
+  The same list ships as <a href="plusone_changelog.txt"><code>plusone_changelog.txt</code></a>.</i>
+</p>
+
+<h3>📅 2026-10-25</h3>
+
+<details open>
+<summary><b>⌨️ Keys: playback</b></summary>
+<br>
+
+New default keys (Settings → REFERENCE → Playback). All of them can be rebound as before.
+
+<table>
+  <tr><th align="left">Action</th><th align="left">New key</th><th align="left">Was</th></tr>
+  <tr><td>Toggle Play / Pause</td><td><kbd>SPACE</kbd></td><td><kbd>p</kbd></td></tr>
+  <tr><td>Volume Up</td><td><kbd>Shift</kbd> + <kbd>↑</kbd></td><td><kbd>+</kbd></td></tr>
+  <tr><td>Volume Down</td><td><kbd>Shift</kbd> + <kbd>↓</kbd></td><td><kbd>-</kbd></td></tr>
+  <tr><td>Next Track</td><td><kbd>Shift</kbd> + <kbd>→</kbd></td><td><kbd>n</kbd></td></tr>
+  <tr><td>Prev Track</td><td><kbd>Shift</kbd> + <kbd>←</kbd></td><td><kbd>b</kbd></td></tr>
+</table>
+
+<ul>
+  <li>Shift + arrow combinations can now be bound: press the combination in a key field, or type e.g. <code>SHIFT+UP</code>.</li>
+  <li>Where a shifted arrow is not bound it still acts as the plain arrow. The big list and queue overlays keep <kbd>Shift</kbd> + <kbd>↑</kbd>/<kbd>↓</kbd> for paging.</li>
+  <li><b>Radio Player:</b> <kbd>Shift</kbd> + <kbd>↑</kbd>/<kbd>↓</kbd> changes the volume and <kbd>Shift</kbd> + <kbd>→</kbd>/<kbd>←</kbd> tunes the next / previous channel. The preset banks moved to <kbd>Alt</kbd> + <kbd>←</kbd>/<kbd>→</kbd>.</li>
+</ul>
+</details>
+
+<details open>
+<summary><b>🧭 Keys: navigation</b></summary>
+<br>
+
+New keys under Settings → REFERENCE → Navigation &amp; View (also in the cheat sheet):
+
+<table>
+  <tr><th align="left">Action</th><th align="left">Key</th><th align="left">What it does</th></tr>
+  <tr><td>Fast Navigate Up</td><td><kbd>PgUp</kbd></td><td>jump 10 rows up</td></tr>
+  <tr><td>Fast Navigate Down</td><td><kbd>PgDn</kbd></td><td>jump 10 rows down</td></tr>
+  <tr><td>Navigate Top</td><td><kbd>Home</kbd></td><td>jump to the first row</td></tr>
+  <tr><td>Navigate Bottom</td><td><kbd>End</kbd></td><td>jump to the last row</td></tr>
+</table>
+
+<ul>
+  <li>They work in the track list and in the queue, can be rebound, and are stored in <code>config.txt</code> (<code>HKeyNavigateFastUp</code>, <code>HKeyNavigateFastDown</code>, <code>HKeyNavigateTop</code>, <code>HKeyNavigateBottom</code>).</li>
+  <li><kbd>ESC</kbd> twice in a row (within 0.8 s) in the main view quits the program. The first <kbd>ESC</kbd> still goes back to the home view.</li>
+</ul>
+</details>
+
+<details open>
+<summary><b>🔀 Play mode box</b></summary>
+<br>
+
+<ul>
+  <li>The box next to the search bar now shows the play mode as a word: <code>LIST</code>, <code>REPEAT</code>, <code>SHUFFLE</code>, <code>STOP</code> or <code>QUEUE</code> (queue then stop). <kbd>M</kbd> still steps through the modes.</li>
+  <li>The mode is saved at once and is back the next time Mousiki starts.</li>
+  <li><b>Next Track follows the play mode:</b> with <code>SHUFFLE</code> on it jumps to a random track. The queue still plays in order.</li>
+</ul>
+</details>
+
+<details open>
+<summary><b>📁 Folders pane (Music Player)</b></summary>
+<br>
+
+<kbd>F6</kbd> swaps the QUEUE pane for a FOLDERS pane, <kbd>F7</kbd> brings the queue back. The last choice is remembered (<code>plusone_state.txt</code> next to <code>config.txt</code>).
+
+The FOLDERS pane is a small file explorer over the local music paths (Settings → PATHS → Local Path):
+
+<ul>
+  <li>Only folders with music files in them or below them are listed, with the number of files in each.</li>
+  <li>At the top level an <b>All</b> row comes first. It is not a folder: <kbd>ENTER</kbd> on it lists every track of all the paths. It is only there at the top.</li>
+  <li><kbd>ENTER</kbd> on a folder lists the music files lying directly in it in the LOCAL AUDIO FILES pane. If the folder holds more folders, the pane goes into it and shows those (a <code>&gt;</code> marks such a folder).</li>
+  <li><kbd>BACKSPACE</kbd> goes one step back; at the top level the paths themselves are shown.</li>
+  <li><kbd>TAB</kbd> moves the keys between the track list and the FOLDERS pane. Up, Down, <kbd>PgUp</kbd>, <kbd>PgDn</kbd>, <kbd>Home</kbd> and <kbd>End</kbd> work as in the lists.</li>
+</ul>
+</details>
+
+<details open>
+<summary><b>🖥️ Modes and screens</b></summary>
+<br>
+
+<ul>
+  <li><kbd>F1</kbd> / <kbd>F2</kbd> / <kbd>F3</kbd> jump straight to the Music Player / Radio Player / Audio Book Player. A mode that is switched off under Settings → ON/OFF → MODES is skipped with a short note.</li>
+  <li><kbd>F4</kbd> opens the help wizard, <kbd>F5</kbd> opens the settings.</li>
+  <li>A <b>key legend</b> now fills the bottom row, in the colours of the player, with the current mode highlighted:<br>
+      <code>F1 music · F2 radio · F3 books · F4 wizard · F5 settings · F6 folders · F7 queue · ESC quit</code><br>
+      It is shown in all three players. <kbd>F6</kbd> / <kbd>F7</kbd> only exist in the Music Player.</li>
+  <li><b>Hold <kbd>F12</kbd></b> (<code>F12 controls</code> in the right corner) and the legend shows the playback keys while the key is down:<br>
+      <code>SPACE play · S← prev track · S→ next track · S↑ volume up · S↓ volume down · M mode · S+T sort</code><br>
+      Let go and the normal legend is back. (Windows only; it is a hint about the default keys.)</li>
+</ul>
+</details>
+
+<details open>
+<summary><b>🪟 Window and launchers</b></summary>
+<br>
+
+<ul>
+  <li>Portable folder <code>Mousiki-Plus</code> with the three launchers <code>mousiki.cmd</code>, <code>mousiki-wt.cmd</code> and <code>lala.cmd</code>. <code>mousiki-wt.cmd</code> opens Windows Terminal in a roughly square window (100 × 48 characters by default).</li>
+  <li><b>The window size is remembered.</b> When Mousiki quits it saves the size to <code>window_size.txt</code> next to the launchers, and <code>mousiki-wt.cmd</code> opens the next window in that size.</li>
+  <li><b>Maximized and full screen are remembered too</b> (<code>window_state.txt</code>). The normal size from before is kept, so leaving maximized brings it back.</li>
+  <li>Closing the window with the X button does not save the size; quit with the keys.</li>
+  <li><b>Full width:</b> the screen used to stop at 200 columns and leave an empty strip on the right; it now goes up to 400 columns in all three players.</li>
+</ul>
+</details>
+
+<hr>
+<!-- PLUSONE-CHANGELOG-END -->
+
+
 Mousiki is a terminal music player that was originally built for macOS/Linux by the amazing [itzender5820/mousiki, v1.0](https://github.com/itzender5820/mousiki) for people who prefer control, simplicity, and a keyboard (mousi-**key**). This Mousiki fork lets it also run natively on Windows (including quite a bunch of modifications and additions; code grew 6-7x the original length; design maintained for obvious reasons). All credits for the design, main feature set, and the core code goes to the original author. Since v2.5.0 the code base builds natively on **Linux and macOS** again (see [Build it yourself (Linux / macOS)](#build-it-yourself-linux--macos) or use the [setup packages or portable versions for all three platforms in the latest release](https://github.com/StSchwerdtfeger/mousiki-plus/releases/latest)). Windows remains the primary and most tested platform (only tested Linux via WSL and works fine so far, a few bugs were recently fixed; not much tested for macOS and non-WSL Linux systems). Feel free to give feedback in the discussions and report issues you might experience using this modified port. 
 
 Build yourself (see [prerequisites](#prerequisites-windows) below) **or use the installer/portable (x64) version** that is included in every new release (since v2.1.0). A full **[user manual](Mousiki_User_Manual/Mousiki_User_Guide.md)** (also as [PDF](Mousiki_User_Manual/Mousiki_User_Guide.pdf)) walks through every entry of the in-app cheat sheet, every settings tab and every overlay.
