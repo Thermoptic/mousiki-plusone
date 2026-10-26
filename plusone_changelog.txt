@@ -112,6 +112,11 @@
   * It is shown in the Music Player, the Audio Book Player and the Radio
     Player. In the radio the station lists give up one row for it.
   * F6 / F7 (folders / queue) only exist in the Music Player.
+  * Hold F12 ("F12 controls" in the right corner) and the legend shows the
+    playback keys while the key is down: SPACE play, S+left prev track,
+    S+right next track, S+up volume up, S+down volume down, M mode,
+    S+T sort. Let go and the normal legend is back. (Windows only; it is
+    a hint about the default keys.)
 
 
   WINDOW AND LAUNCHERS

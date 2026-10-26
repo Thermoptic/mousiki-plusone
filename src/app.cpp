@@ -11872,27 +11872,39 @@ std::string App::render_frame(TerminalIO& term) {
     }
     out += floating.str();
     // PlusOne: the key legend on the terminal's last row (the one row the frame leaves blank): which F key goes where.
-    // Absolute move, no newline, one column short of the width -- it cannot scroll the screen.
+    // Absolute move, no newline, one column short of the width -- it cannot scroll the screen. While F12 is held down the
+    // legend shows the playback keys instead; "F12 controls" stays in the right corner.
     if (mode_ == Mode::Browse && term_rows_ >= 10) {
         struct Hint { const char* key; const char* label; };
         static const Hint hints_music[] = {{"F1", "music"}, {"F2", "radio"}, {"F3", "books"}, {"F4", "wizard"}, {"F5", "settings"}, {"F6", "folders"}, {"F7", "queue"}, {"ESC", "quit"}};
         static const Hint hints_book[] = {{"F1", "music"}, {"F2", "radio"}, {"F3", "books"}, {"F4", "wizard"}, {"F5", "settings"}, {"ESC", "quit"}};
-        const Hint* hints = audiobook_ ? hints_book : hints_music;
-        const size_t hint_count = audiobook_ ? sizeof(hints_book) / sizeof(hints_book[0]) : sizeof(hints_music) / sizeof(hints_music[0]);
+        static const Hint hints_controls[] = {{"SPACE", "play"}, {"S←", "prev track"}, {"S→", "next track"}, {"S↑", "volume up"}, {"S↓", "volume down"}, {"M", "mode"}, {"S+T", "sort"}};
+#ifdef _WIN32
+        const bool controls = win_f12_held();
+#else
+        const bool controls = false;
+#endif
+        const Hint* hints = controls ? hints_controls : audiobook_ ? hints_book : hints_music;
+        const size_t hint_count = controls ? sizeof(hints_controls) / sizeof(hints_controls[0])
+                                : audiobook_ ? sizeof(hints_book) / sizeof(hints_book[0]) : sizeof(hints_music) / sizeof(hints_music[0]);
         const int me = audiobook_ ? 2 : 0;
         const std::string badge = bg_ansi_for(settings_.border_color) + "\x1b[30m";
         const std::string here = bg_ansi_for(settings_.focus_color) + "\x1b[30m";
         const std::string label = ansi_for(settings_.list_color, false);
+        const std::string f12_hint = badge + " F12 \x1b[0m " + label + "controls\x1b[0m";
+        const int f12_w = 5 + 1 + 8;
         std::string row;
         int used = 0;
         for (size_t i = 0; i < hint_count; ++i) {
             const std::string k = std::string(" ") + hints[i].key + " ";
             const int w = display_width(k) + 1 + display_width(hints[i].label) + 3;
-            if (used + w > W - 2) break;
-            row += (i < 3 && static_cast<int>(i) * 1 == (me == 0 ? 0 : me == 2 ? 2 : -1) ? here : badge) + k + "\x1b[0m " + label + hints[i].label + "\x1b[0m   ";
+            if (used + w > W - 2 - f12_w - 2) break;
+            row += (!controls && i < 3 && static_cast<int>(i) * 1 == (me == 0 ? 0 : me == 2 ? 2 : -1) ? here : badge) + k + "\x1b[0m " + label + hints[i].label + "\x1b[0m   ";
             used += w;
         }
-        out += "\x1b[" + std::to_string(term_rows_) + ";2H\x1b[0m" + row + "\x1b[0m";
+        const std::string at_row = "\x1b[" + std::to_string(term_rows_) + ";";
+        out += at_row + "1H\x1b[2K" + at_row + "2H\x1b[0m" + row + "\x1b[0m";
+        if (W > f12_w + 4) out += at_row + std::to_string(W - f12_w) + "H\x1b[0m" + f12_hint;
     }
     if (gfx_.active) {
         const bool floating_mode = mode_ != Mode::Browse && mode_ != Mode::Search;

@@ -56,6 +56,10 @@ void win_console_restore();
 // MOUSIKI_HOME is not set (the launchers set it).
 void win_save_window_size();
 
+// PlusOne: true while the F12 key is held down and this terminal window is the one that has the keyboard (the console input only
+// reports key presses, so holding a key has to be asked for).
+bool win_f12_held();
+
 // Raw-ish input mode, the counterpart of the termios ECHO/ICANON clearing on
 // POSIX. Input is actually read through _getch(), which is already
 // unbuffered and non-echoing, so this only has to deal with the output side

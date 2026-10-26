@@ -277,6 +277,14 @@ bool win_console_init() {
     return g_con.vt_enabled;
 }
 
+bool win_f12_held() {
+    if (!(GetAsyncKeyState(VK_F12) & 0x8000)) return false;
+    HWND con = GetConsoleWindow();
+    HWND top = con ? GetAncestor(con, GA_ROOTOWNER) : nullptr;
+    HWND fg = GetForegroundWindow();
+    return !con || fg == con || (top && fg == top);
+}
+
 void win_save_window_size() {
     const char* home = std::getenv("MOUSIKI_HOME");
     if (!home || !*home) return;
