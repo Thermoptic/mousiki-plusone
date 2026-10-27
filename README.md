@@ -127,6 +127,7 @@ The FOLDERS pane is a small file explorer over the local music paths (Settings â
   <li><b>The window size is remembered.</b> When Mousiki quits it saves the size to <code>window_size.txt</code> next to the launchers, and <code>mousiki-wt.cmd</code> opens the next window in that size.</li>
   <li><b>Maximized and full screen are remembered too</b> (<code>window_state.txt</code>). The normal size from before is kept, so leaving maximized brings it back.</li>
   <li>Closing the window with the X button does not save the size; quit with the keys.</li>
+  <li><b>Old console window:</b> <code>mousiki.cmd</code> / <code>lala.cmd</code> in <code>cmd.exe</code> have no font with Braille characters, so the disk and visualizers showed as boxes. Mousiki now notices this and draws block characters instead (coarser, same shapes). Windows Terminal, VS Code and ConEmu keep the Braille look. <code>MOUSIKI_BLOCKS=1</code> / <code>0</code> forces blocks / Braille.</li>
   <li><b>Full width:</b> the screen used to stop at 200 columns and leave an empty strip on the right; it now goes up to 400 columns in all three players.</li>
 </ul>
 </details>

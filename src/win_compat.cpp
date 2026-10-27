@@ -96,6 +96,41 @@ namespace {
 // CP1252: "\xe2\x94\x80" -> "â\x94\x80" -> "â”€"). WriteConsoleW has no such
 // ambiguity: it takes UTF-16 code units and the console displays them
 // directly, so converting ourselves removes the codepage guess entirely.
+// PlusOne: the old Windows console window (cmd.exe / conhost) has no font with the Braille characters, so everything drawn with
+// them shows up as empty boxes. There, every Braille cell is drawn as a block character instead, taking what its 2 x 4 dots
+// say: a clean half-filled cell becomes a half block, a partly filled one a shade (light / medium / dark by how many dots are
+// set), so the edges of shapes fade out. The blocks used exist in the console
+// fonts Consolas and Lucida Console: space, upper / lower / left / right half, full block and the three shades.
+// Windows Terminal, VS Code and ConEmu draw Braille fine and are left alone (WT_SESSION / TERM_PROGRAM / ConEmuPID are set
+// there). MOUSIKI_BLOCKS=1 forces the blocks, MOUSIKI_BLOCKS=0 forces Braille.
+bool g_block_mode = false;
+
+wchar_t braille_to_block(wchar_t c) {
+    const unsigned dots = static_cast<unsigned>(c - 0x2800);
+    const int q[4] = {
+        ((dots & 0x01) ? 1 : 0) + ((dots & 0x02) ? 1 : 0),   // top left: dots 1, 2
+        ((dots & 0x08) ? 1 : 0) + ((dots & 0x10) ? 1 : 0),   // top right: dots 4, 5
+        ((dots & 0x04) ? 1 : 0) + ((dots & 0x40) ? 1 : 0),   // bottom left: dots 3, 7
+        ((dots & 0x20) ? 1 : 0) + ((dots & 0x80) ? 1 : 0)};  // bottom right: dots 6, 8
+    const int total = q[0] + q[1] + q[2] + q[3];
+    if (total == 0) return L' ';
+    if (total == 8) return 0x2588;                                           // full block
+    // A crisp half block only where one half is completely filled and the other is empty: the clean edge of a shape.
+    if (q[0] == 2 && q[1] == 2 && q[2] + q[3] == 0) return 0x2580;           // upper half
+    if (q[2] == 2 && q[3] == 2 && q[0] + q[1] == 0) return 0x2584;           // lower half
+    if (q[0] == 2 && q[2] == 2 && q[1] + q[3] == 0) return 0x258C;           // left half
+    if (q[1] == 2 && q[3] == 2 && q[0] + q[2] == 0) return 0x2590;           // right half
+    // Everything else is a shade by how many of the eight dots are set: the edge fades out.
+    if (total <= 2) return 0x2591;                                           // light shade
+    if (total <= 5) return 0x2592;                                           // medium shade
+    return 0x2593;                                                           // dark shade
+}
+
+bool detect_block_mode() {
+    if (const char* f = std::getenv("MOUSIKI_BLOCKS")) return f[0] == '1';
+    return !std::getenv("WT_SESSION") && !std::getenv("TERM_PROGRAM") && !std::getenv("ConEmuPID");
+}
+
 class Utf8ConsoleStreambuf : public std::streambuf {
 public:
     explicit Utf8ConsoleStreambuf(HANDLE h) : handle_(h) {}
@@ -168,6 +203,7 @@ private:
         if (wlen <= 0) return;
         std::wstring wide(static_cast<size_t>(wlen), L'\0');
         MultiByteToWideChar(CP_UTF8, 0, utf8.data(), static_cast<int>(utf8.size()), &wide[0], wlen);
+        if (g_block_mode) for (wchar_t& ch : wide) if (ch >= 0x2800 && ch <= 0x28FF) ch = braille_to_block(ch);
         DWORD written = 0;
         WriteConsoleW(handle_, wide.data(), static_cast<DWORD>(wide.size()), &written, nullptr);
     }
@@ -234,6 +270,7 @@ bool win_console_init() {
     if (g_initialized.exchange(true)) return g_con.vt_enabled;
 
     g_con.out = GetStdHandle(STD_OUTPUT_HANDLE);
+    g_block_mode = detect_block_mode();   // PlusOne: blocks instead of Braille in the old console window
     g_con.in  = GetStdHandle(STD_INPUT_HANDLE);
 
     g_con.orig_out_cp = GetConsoleOutputCP();

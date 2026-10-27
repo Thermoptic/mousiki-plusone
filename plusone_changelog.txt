@@ -138,6 +138,16 @@
   * Closing the window with the X button does not save the size; quit
     with the keys.
 
+  mousiki.cmd and lala.cmd in the old console window (cmd.exe): that window
+  has no font with the Braille characters, so the disk and the visualizers
+  showed up as empty boxes. Mousiki now notices it and draws block
+  characters instead (half blocks, full blocks and shades; partly filled
+  cells become light / medium / dark shades so edges fade out). It is coarser
+  than Braille but keeps the shapes. Windows Terminal (mousiki-wt.cmd), VS
+  Code and ConEmu are not affected and keep the Braille look.
+  Set MOUSIKI_BLOCKS=1 to force the blocks, MOUSIKI_BLOCKS=0 to force
+  Braille.
+
   The screen now uses the full width of wide windows. The layout used to
   stop at 200 columns and leave an empty strip on the right; it now goes
   up to 400 columns in all three players.
