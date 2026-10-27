@@ -531,7 +531,9 @@ int win_poll_key() {
     // Up/Down are unaffected (nothing in the UI marks with them) and keep
     // collapsing to 'A'/'B' either way -- the Shift state is only exposed
     // through win_last_key_was_shifted() (the list overlay's page jumps).
-    const bool shifted = (k.dwControlKeyState & SHIFT_PRESSED) != 0;
+    // PlusOne: F12 held down counts as Shift (SHIFT+arrows: volume / next / prev track, SHIFT+t: sort ...).
+    const bool f12_as_shift = win_f12_held();
+    const bool shifted = (k.dwControlKeyState & SHIFT_PRESSED) != 0 || f12_as_shift;
     // Alt held (without Shift) on Left/Right -- the playlist editor's tab
     // switch (see kKeyAltLeft/Right in terminal_ui.h). Checked the same
     // way as the Ctrl+Shift+S/X guard further down: dwControlKeyState is
@@ -628,6 +630,7 @@ int win_poll_key() {
     g_last_key_was_arrow = false; // from here down it is a real character or nothing at all
     if (wc == 0) return 0; // a bare modifier, function key, Home/End/PgUp/... -- ignored, as on POSIX
     if (wc == 8) return 127; // Backspace -- same normalization the old _getch() path applied
+    if (f12_as_shift && wc >= L'a' && wc <= L'z') wc = static_cast<wchar_t>(wc - 32);   // F12 + letter = the SHIFT letter
     if (wc < 128) return static_cast<int>(wc); // plain ASCII: Enter (13), Tab (9), Esc (27), space, digits, letters, ...
 
     // A real non-ASCII character: a German a/o/u-umlaut typed directly off

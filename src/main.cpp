@@ -17,6 +17,7 @@
 #endif
 
 int main(int argc, char** argv) {
+    for (int i = 1; i < argc; ++i) if (std::string(argv[i]) == "--from-wt") g_launched_from_wt = true;
     // `mousiki --cmd next`, `mousiki --status`: remote control of a running Mousiki (src/remote_control.h). No terminal, no audio.
     if (muisc::remote::is_client_call(argc, argv)) {
 #if defined(_WIN32)

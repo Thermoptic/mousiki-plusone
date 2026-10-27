@@ -115,8 +115,15 @@
   * Hold F12 ("F12 controls" in the right corner) and the legend shows the
     playback keys while the key is down: SPACE play, S+left prev track,
     S+right next track, S+up volume up, S+down volume down, M mode,
-    S+T sort. Let go and the normal legend is back. (Windows only; it is
-    a hint about the default keys.)
+    S+T sort. Their key boxes use another theme colour than the usual
+    ones, and the F12 box itself a third one, so it is clear that other
+    keys are showing (colours the theme gives the same value are skipped).
+    Let go and the normal legend is back. (Windows only; it is a hint
+    about the default keys.)
+  * Started with mousiki.cmd or lala.cmd (not mousiki-wt.cmd) the legend
+    names the keys after F12 (F12+Up, F12+Left, ...) so they are unique.
+  * F12 held down also works as Shift: F12 + Up / Down for volume, F12 +
+    Left / Right for previous / next track, F12 + T for sort, and so on.
 
 
   WINDOW AND LAUNCHERS

@@ -15,5 +15,9 @@ inline int g_mode_switch_dir = 1;
 // one instead of stepping with g_mode_switch_dir); -1 = no direct target.
 inline int g_mode_switch_target = -1;
 
+// PlusOne: mousiki-wt.cmd adds "--from-wt" to the command line. The legend that shows while F12 is held then says S+arrow;
+// started by mousiki.cmd / lala.cmd it says F12+arrow (F12 works as Shift either way).
+inline bool g_launched_from_wt = false;
+
 // The radio mode (src_radio/radio_main.cpp). Returns 0 on a normal quit, kExitSwitchMode for the mode switch ('*').
 int radio_main(int argc, char** argv);

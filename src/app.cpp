@@ -11878,20 +11878,40 @@ std::string App::render_frame(TerminalIO& term) {
         struct Hint { const char* key; const char* label; };
         static const Hint hints_music[] = {{"F1", "music"}, {"F2", "radio"}, {"F3", "books"}, {"F4", "wizard"}, {"F5", "settings"}, {"F6", "folders"}, {"F7", "queue"}, {"ESC", "quit"}};
         static const Hint hints_book[] = {{"F1", "music"}, {"F2", "radio"}, {"F3", "books"}, {"F4", "wizard"}, {"F5", "settings"}, {"ESC", "quit"}};
-        static const Hint hints_controls[] = {{"SPACE", "play"}, {"S←", "prev track"}, {"S→", "next track"}, {"S↑", "volume up"}, {"S↓", "volume down"}, {"M", "mode"}, {"S+T", "sort"}};
+        static const Hint hints_controls_s[] = {{"SPACE", "play"}, {"S←", "prev track"}, {"S→", "next track"}, {"S↑", "volume up"}, {"S↓", "volume down"}, {"M", "mode"}, {"S+T", "sort"}};
+        // started by mousiki.cmd / lala.cmd (not mousiki-wt.cmd): the keys are named after F12, which is the unique one there
+        static const Hint hints_controls_f12[] = {{"SPACE", "play"}, {"F12←", "prev track"}, {"F12→", "next track"}, {"F12↑", "volume up"}, {"F12↓", "volume down"}, {"M", "mode"}, {"F12+T", "sort"}};
+        const Hint* hints_controls = g_launched_from_wt ? hints_controls_s : hints_controls_f12;
+        const size_t controls_count = sizeof(hints_controls_s) / sizeof(hints_controls_s[0]);
 #ifdef _WIN32
         const bool controls = win_f12_held();
 #else
         const bool controls = false;
 #endif
         const Hint* hints = controls ? hints_controls : audiobook_ ? hints_book : hints_music;
-        const size_t hint_count = controls ? sizeof(hints_controls) / sizeof(hints_controls[0])
+        const size_t hint_count = controls ? controls_count
                                 : audiobook_ ? sizeof(hints_book) / sizeof(hints_book[0]) : sizeof(hints_music) / sizeof(hints_music[0]);
         const int me = audiobook_ ? 2 : 0;
         const std::string badge = bg_ansi_for(settings_.border_color) + "\x1b[30m";
         const std::string here = bg_ansi_for(settings_.focus_color) + "\x1b[30m";
+        // While F12 is held the key boxes take another theme colour than the usual ones, and the F12 box a third one, so it is
+        // clear at a glance that other keys are showing. Each is the first colour of its list that is set and differs from the
+        // ones already in use (a theme can give several of them the same value: ColorFocus is often the border colour).
+        const auto distinct = [](std::initializer_list<const std::string*> candidates, std::initializer_list<const std::string*> used) {
+            for (const std::string* c : candidates) {
+                if (c->empty()) continue;
+                bool taken = false;
+                for (const std::string* u : used) if (*u == *c) taken = true;
+                if (!taken) return *c;
+            }
+            return std::string();
+        };
+        const std::string controls_color = distinct({&settings_.header_color, &settings_.legend_cmd_color, &settings_.focus_color, &settings_.list_playing_color}, {&settings_.border_color});
+        const std::string f12_color = distinct({&settings_.focus_color, &settings_.legend_cmd_color, &settings_.header_color, &settings_.list_playing_color, &settings_.list_color}, {&settings_.border_color, &controls_color});
+        const std::string badge_controls = bg_ansi_for(controls_color) + "\x1b[30m";
+        const std::string badge_f12_held = bg_ansi_for(f12_color) + "\x1b[30m";
         const std::string label = ansi_for(settings_.list_color, false);
-        const std::string f12_hint = badge + " F12 \x1b[0m " + label + "controls\x1b[0m";
+        const std::string f12_hint = (controls ? badge_f12_held : badge) + " F12 \x1b[0m " + label + "controls\x1b[0m";
         const int f12_w = 5 + 1 + 8;
         std::string row;
         int used = 0;
@@ -11899,7 +11919,7 @@ std::string App::render_frame(TerminalIO& term) {
             const std::string k = std::string(" ") + hints[i].key + " ";
             const int w = display_width(k) + 1 + display_width(hints[i].label) + 3;
             if (used + w > W - 2 - f12_w - 2) break;
-            row += (!controls && i < 3 && static_cast<int>(i) * 1 == (me == 0 ? 0 : me == 2 ? 2 : -1) ? here : badge) + k + "\x1b[0m " + label + hints[i].label + "\x1b[0m   ";
+            row += (controls ? badge_controls : (i < 3 && static_cast<int>(i) * 1 == (me == 0 ? 0 : me == 2 ? 2 : -1)) ? here : badge) + k + "\x1b[0m " + label + hints[i].label + "\x1b[0m   ";
             used += w;
         }
         const std::string at_row = "\x1b[" + std::to_string(term_rows_) + ";";
