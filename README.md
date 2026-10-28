@@ -130,6 +130,8 @@ The FOLDERS pane is a small file explorer over the local music paths (Settings â
   <li><b>Maximized and full screen are remembered too</b> (<code>window_state.txt</code>). The normal size from before is kept, so leaving maximized brings it back.</li>
   <li>Closing the window with the X button does not save the size; quit with the keys.</li>
   <li><b>Old console window:</b> <code>mousiki.cmd</code> / <code>lala.cmd</code> in <code>cmd.exe</code> have no font with Braille characters, so the disk and visualizers showed as boxes. Mousiki now notices this and draws block characters instead (coarser, same shapes). Windows Terminal, VS Code and ConEmu keep the Braille look. <code>MOUSIKI_BLOCKS=1</code> / <code>0</code> forces blocks / Braille.</li>
+  <li><b>Alacritty:</b> <code>mousiki-alacritty.cmd</code> starts Mousiki in <a href="https://github.com/alacritty/alacritty">Alacritty</a>, a fast terminal that needs no installation (a portable <code>alacritty.exe</code> v0.17.0 with its licence files sits in the <code>alacritty</code> folder). No scroll bar, real Braille dots, remembers the window size and maximized / full screen, <kbd>F11</kbd> toggles full screen. Needs Windows 10 1809 or later.</li>
+  <li>The program now finds the window of whichever terminal it runs in, so holding <kbd>F12</kbd> and the saved window size also work in Alacritty and other terminals.</li>
   <li><b>Full width:</b> the screen used to stop at 200 columns and leave an empty strip on the right; it now goes up to 400 columns in all three players.</li>
 </ul>
 </details>

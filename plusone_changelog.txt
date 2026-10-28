@@ -155,6 +155,18 @@
   Set MOUSIKI_BLOCKS=1 to force the blocks, MOUSIKI_BLOCKS=0 to force
   Braille.
 
+  mousiki-alacritty.cmd starts Mousiki in Alacritty, a fast terminal that
+  needs no installation. A portable alacritty.exe (v0.17.0, Apache 2.0 /
+  MIT, licence files included) sits in the alacritty folder with its
+  settings (alacritty.toml). It has no scroll bar, draws Braille with real
+  dots, keeps the window size and maximized / full screen state like
+  mousiki-wt.cmd, and F11 toggles full screen. Needs Windows 10 1809 or
+  later.
+
+  The program now finds the window of whichever terminal it runs in (also
+  Alacritty and others, not only Windows Terminal and the old console).
+  This is what makes holding F12 and the saved window size work there.
+
   The screen now uses the full width of wide windows. The layout used to
   stop at 200 columns and leave an empty strip on the right; it now goes
   up to 400 columns in all three players.

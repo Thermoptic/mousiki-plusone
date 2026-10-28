@@ -10,6 +10,7 @@
 #define NOMINMAX
 #endif
 #include <windows.h>
+#include <tlhelp32.h>
 
 // Older SDKs (and some MinGW-w64 header sets) predate these; defining them
 // only when absent keeps the build working without requiring a specific SDK.
@@ -314,12 +315,56 @@ bool win_console_init() {
     return g_con.vt_enabled;
 }
 
+// The window of the terminal this program runs in. The old console window is the console window itself; Windows Terminal owns the
+// hidden pseudo console window; other terminals (Alacritty ...) do neither, so then it is the visible top-level window of one of
+// our parent processes. Cached for a second: it is asked for every frame.
+static HWND terminal_window() {
+    static HWND cached = nullptr;
+    static ULONGLONG cached_at = 0;
+    const ULONGLONG now = GetTickCount64();
+    if (cached && IsWindow(cached) && now - cached_at < 1000) return cached;
+    cached_at = now;
+    cached = nullptr;
+    HWND con = GetConsoleWindow();
+    HWND top = con ? GetAncestor(con, GA_ROOTOWNER) : nullptr;
+    if (top && IsWindowVisible(top)) { cached = top; return cached; }
+    // our parent processes
+    std::set<DWORD> pids;
+    {
+        HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+        if (snap != INVALID_HANDLE_VALUE) {
+            std::vector<std::pair<DWORD, DWORD>> all;   // pid, parent pid
+            PROCESSENTRY32W e{}; e.dwSize = sizeof e;
+            for (BOOL ok = Process32FirstW(snap, &e); ok; ok = Process32NextW(snap, &e)) all.emplace_back(e.th32ProcessID, e.th32ParentProcessID);
+            CloseHandle(snap);
+            DWORD cur = GetCurrentProcessId();
+            for (int depth = 0; depth < 12 && cur != 0; ++depth) {
+                DWORD parent = 0;
+                for (const auto& pr : all) if (pr.first == cur) { parent = pr.second; break; }
+                if (parent == 0 || !pids.insert(parent).second) break;
+                cur = parent;
+            }
+        }
+    }
+    struct Ctx { const std::set<DWORD>* pids; HWND found; } ctx{&pids, nullptr};
+    EnumWindows([](HWND h, LPARAM lp) -> BOOL {
+        Ctx* c = reinterpret_cast<Ctx*>(lp);
+        if (!IsWindowVisible(h) || GetWindow(h, GW_OWNER) != nullptr) return TRUE;
+        DWORD pid = 0;
+        GetWindowThreadProcessId(h, &pid);
+        if (c->pids->count(pid)) { c->found = h; return FALSE; }
+        return TRUE;
+    }, reinterpret_cast<LPARAM>(&ctx));
+    cached = ctx.found;
+    return cached;
+}
+
 bool win_f12_held() {
     if (!(GetAsyncKeyState(VK_F12) & 0x8000)) return false;
     HWND con = GetConsoleWindow();
-    HWND top = con ? GetAncestor(con, GA_ROOTOWNER) : nullptr;
+    HWND top = terminal_window();
     HWND fg = GetForegroundWindow();
-    return !con || fg == con || (top && fg == top);
+    return !con || fg == con || !top || fg == top;
 }
 
 void win_save_window_size() {
@@ -332,7 +377,7 @@ void win_save_window_size() {
     std::string state = "normal";
     HWND con = GetConsoleWindow();
     if (con) {   // in Windows Terminal this is a hidden pseudo window; its owner is the real window
-        HWND top = GetAncestor(con, GA_ROOTOWNER);
+        HWND top = terminal_window();
         if (!top) top = con;
         RECT wr{};
         const LONG style = GetWindowLongW(top, GWL_STYLE);
