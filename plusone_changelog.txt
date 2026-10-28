@@ -65,6 +65,11 @@
   M still steps through the modes. The mode is saved at once and is back
   the next time Mousiki starts.
 
+  The sort mode chosen with SHIFT+t (folder order / title / artist /
+  recently added) is remembered: it stays when you change folder, filter
+  or search, and it is back the next time Mousiki starts
+  (plusone_state.txt).
+
   Next Track follows the play mode: with SHUFFLE on it jumps to a random
   track instead of the next one in the list. The queue still plays in
   order.
@@ -115,9 +120,10 @@
   * Hold F12 ("F12 controls" in the right corner) and the legend shows the
     playback keys while the key is down: SPACE play, S+left prev track,
     S+right next track, S+up volume up, S+down volume down, M mode,
-    S+T sort. Their key boxes use another theme colour than the usual
-    ones, and the F12 box itself a third one, so it is clear that other
-    keys are showing (colours the theme gives the same value are skipped).
+    S+T sort, F11 fullscreen. Their key boxes use another theme colour
+    than the usual ones, and the F12 box itself a third one, so it is
+    clear that other keys are showing (colours the theme gives the same
+    value are skipped).
     Let go and the normal legend is back. (Windows only; it is a hint
     about the default keys.)
   * Started with mousiki.cmd or lala.cmd (not mousiki-wt.cmd) the legend
@@ -162,6 +168,11 @@
   dots, keeps the window size and maximized / full screen state like
   mousiki-wt.cmd, and F11 toggles full screen. Needs Windows 10 1809 or
   later.
+
+  Fixed: when Mousiki was closed in full screen, Alacritty used to be
+  started in full screen, and F11 then left it as a small window that could
+  not be moved or resized. It now starts as a normal window and Mousiki
+  puts it into full screen itself.
 
   The program now finds the window of whichever terminal it runs in (also
   Alacritty and others, not only Windows Terminal and the old console).

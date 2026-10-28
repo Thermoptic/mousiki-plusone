@@ -138,7 +138,6 @@ void App::fx_open() {
     if (e.all) {   // every track of every path
         folder_filter_.clear();
         last_local_query_.clear();
-        local_sort_mode_ = 0;
         list_source_ = ListSource::Local;
         selected_ = 0;
         scroll_ = 0;
@@ -150,7 +149,6 @@ void App::fx_open() {
     if (e.direct > 0 && !e.filter.empty()) {   // the music files of the folder into the LOCAL AUDIO FILES pane
         folder_filter_ = e.filter;
         last_local_query_.clear();
-        local_sort_mode_ = 0;
         list_source_ = ListSource::Local;
         selected_ = 0;
         scroll_ = 0;
@@ -210,6 +208,7 @@ void App::fx_save_state() const {
     if (!out) return;
     out << "FoldersPane=" << (folders_pane_ ? 1 : 0) << "\n";
     out << "FoldersDir=" << fx_dir_ << "\n";
+    out << "SortMode=" << local_sort_mode_ << "\n";
 }
 
 void App::fx_load_state() {
@@ -220,6 +219,7 @@ void App::fx_load_state() {
         while (!line.empty() && (line.back() == '\r' || line.back() == '\n')) line.pop_back();
         if (line.rfind("FoldersPane=", 0) == 0) folders_pane_ = line.substr(12) == "1";
         else if (line.rfind("FoldersDir=", 0) == 0) fx_dir_ = line.substr(11);
+        else if (line.rfind("SortMode=", 0) == 0) { try { local_sort_mode_ = std::clamp(std::stoi(line.substr(9)), 0, 3); } catch (...) {} }
     }
     if (!fx_dir_.empty() && !fs::is_directory(path_from_utf8(fx_dir_))) fx_dir_.clear();
 }

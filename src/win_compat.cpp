@@ -359,6 +359,14 @@ static HWND terminal_window() {
     return cached;
 }
 
+void win_post_f11_to_terminal() {
+    HWND top = terminal_window();
+    if (!top) return;
+    const LPARAM down = 1 | (0x57 << 16);
+    PostMessageW(top, WM_KEYDOWN, VK_F11, down);
+    PostMessageW(top, WM_KEYUP, VK_F11, down | static_cast<LPARAM>(0xC0000000));
+}
+
 bool win_f12_held() {
     if (!(GetAsyncKeyState(VK_F12) & 0x8000)) return false;
     HWND con = GetConsoleWindow();

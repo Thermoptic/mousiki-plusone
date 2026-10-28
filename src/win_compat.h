@@ -60,6 +60,11 @@ void win_save_window_size();
 // reports key presses, so holding a key has to be asked for).
 bool win_f12_held();
 
+// PlusOne: presses F11 in the terminal window (posted to it, so it does not matter who has the keyboard). mousiki-alacritty.cmd
+// sets MOUSIKI_START_FULLSCREEN=1 when Mousiki was closed in full screen: Alacritty is started as a normal window and put into
+// full screen like this, because a window that is CREATED in full screen cannot be taken out of it properly again.
+void win_post_f11_to_terminal();
+
 // Raw-ish input mode, the counterpart of the termios ECHO/ICANON clearing on
 // POSIX. Input is actually read through _getch(), which is already
 // unbuffered and non-echoing, so this only has to deal with the output side

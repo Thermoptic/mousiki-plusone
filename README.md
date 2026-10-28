@@ -81,6 +81,7 @@ New keys under Settings → REFERENCE → Navigation &amp; View (also in the che
 <ul>
   <li>The box next to the search bar now shows the play mode as a word: <code>LIST</code>, <code>REPEAT</code>, <code>SHUFFLE</code>, <code>STOP</code> or <code>QUEUE</code> (queue then stop). <kbd>M</kbd> still steps through the modes.</li>
   <li>The mode is saved at once and is back the next time Mousiki starts.</li>
+  <li>The <b>sort mode</b> chosen with <kbd>Shift</kbd> + <kbd>T</kbd> is remembered: it stays when you change folder, filter or search, and is back the next time Mousiki starts.</li>
   <li><b>Next Track follows the play mode:</b> with <code>SHUFFLE</code> on it jumps to a random track. The queue still plays in order.</li>
 </ul>
 </details>
@@ -113,7 +114,7 @@ The FOLDERS pane is a small file explorer over the local music paths (Settings �
       <code>F1 music · F2 radio · F3 books · F4 wizard · F5 settings · F6 folders · F7 queue · ESC quit</code><br>
       It is shown in all three players. <kbd>F6</kbd> / <kbd>F7</kbd> only exist in the Music Player.</li>
   <li><b>Hold <kbd>F12</kbd></b> (<code>F12 controls</code> in the right corner) and the legend shows the playback keys while the key is down:<br>
-      <code>SPACE play · S← prev track · S→ next track · S↑ volume up · S↓ volume down · M mode · S+T sort</code><br>
+      <code>SPACE play · S← prev track · S→ next track · S↑ volume up · S↓ volume down · M mode · S+T sort · F11 fullscreen</code><br>
       Their key boxes use another theme colour than the usual ones, and the F12 box itself a third one, so it is clear that other keys are showing. Let go and the normal legend is back. (Windows only; it is a hint about the default keys.)</li>
   <li>Started with <code>mousiki.cmd</code> or <code>lala.cmd</code> (not <code>mousiki-wt.cmd</code>) the legend names these keys after <kbd>F12</kbd> (<code>F12↑</code>, <code>F12←</code> ...) so they are unique.</li>
   <li><b><kbd>F12</kbd> also works as <kbd>Shift</kbd>:</b> hold <kbd>F12</kbd> and press <kbd>↑</kbd>/<kbd>↓</kbd> for volume, <kbd>←</kbd>/<kbd>→</kbd> for previous / next track, <kbd>T</kbd> for sort, and so on.</li>

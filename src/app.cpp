@@ -752,7 +752,8 @@ App::App(Settings* shared, bool audiobook) : audiobook_(audiobook), settings_(sh
     if (audiobook_) book_refresh_view();   // the left pane lists the books
     launch_row_meta_resolver();
     start_device_worker();
-    fx_load_state();   // PlusOne: the FOLDERS pane comes back the way it was left
+    fx_load_state();   // PlusOne: the FOLDERS pane and the sort mode come back the way they were left
+    if (!audiobook_ && local_sort_mode_ != 0) refresh_local_view();
 }
 
 
@@ -1442,7 +1443,6 @@ void App::open_selected_folder() {
     if (folder_view_.empty() || selected_ < 0 || selected_ >= static_cast<int>(folder_view_.size())) return;
     folder_filter_ = folder_view_[static_cast<size_t>(selected_)].path;
     last_local_query_.clear();
-    local_sort_mode_ = 0; // folder order, like 'f'
     list_source_ = ListSource::Local;
     refresh_local_view();
     log_event("filtered: " + path_utf8(path_from_utf8(folder_filter_).filename()));
@@ -4310,10 +4310,7 @@ void App::handle_key(int key) {
         if (list_source_ == ListSource::Local && !local_view_.empty() &&
             selected_ >= 0 && selected_ < static_cast<int>(local_view_.size())) {
             folder_filter_ = path_utf8(local_view_[selected_].path.parent_path());
-            // Filtering by folder also drops back to folder order (T cycles
-            // away from it again), so the pane title reads "sort: folder
-            // order" and the files sit in the order they are on disk.
-            local_sort_mode_ = 0;
+            // PlusOne: the sort mode chosen with SHIFT+t stays (it is remembered, also between starts).
             refresh_local_view();
             log_event("filtered: " + path_utf8(path_from_utf8(folder_filter_).filename()));
         }
@@ -4379,6 +4376,7 @@ void App::handle_key(int key) {
         if (local_sort_mode_ == 3) { std::lock_guard<std::mutex> lk(added_time_mutex_); added_time_cache_.clear(); }   // fresh times each time the mode is chosen
         refresh_local_view();
         log_event(std::string("sort: ") + sort_mode_name(local_sort_mode_, settings_.meta_only));
+        fx_save_state();   // PlusOne: the sort mode is remembered
     } else if (action == "HKeyPlay") {
         if (queue_focus_) { queue_next_run_ = 0; if (!queue_.empty()) play_queue_item(std::clamp(queue_selected_, 0, static_cast<int>(queue_.size()) - 1), last_key_was_shifted()); }   // ENTER in the queue pane (small or big): play the highlighted item; SHIFT+ENTER also moves the queue along up to it
         else play_selected();
@@ -8808,7 +8806,6 @@ void App::folder_overlay_filter() {
     }
     folder_filter_ = dir;
     last_local_query_.clear();   // otherwise an old query would hide files of the folder
-    local_sort_mode_ = 0;        // folder order, like `f`
     list_source_ = ListSource::Local;
     refresh_local_view();
     if (!row.is_dir) {
@@ -11878,9 +11875,9 @@ std::string App::render_frame(TerminalIO& term) {
         struct Hint { const char* key; const char* label; };
         static const Hint hints_music[] = {{"F1", "music"}, {"F2", "radio"}, {"F3", "books"}, {"F4", "wizard"}, {"F5", "settings"}, {"F6", "folders"}, {"F7", "queue"}, {"ESC", "quit"}};
         static const Hint hints_book[] = {{"F1", "music"}, {"F2", "radio"}, {"F3", "books"}, {"F4", "wizard"}, {"F5", "settings"}, {"ESC", "quit"}};
-        static const Hint hints_controls_s[] = {{"SPACE", "play"}, {"S←", "prev track"}, {"S→", "next track"}, {"S↑", "volume up"}, {"S↓", "volume down"}, {"M", "mode"}, {"S+T", "sort"}};
+        static const Hint hints_controls_s[] = {{"SPACE", "play"}, {"S←", "prev track"}, {"S→", "next track"}, {"S↑", "volume up"}, {"S↓", "volume down"}, {"M", "mode"}, {"S+T", "sort"}, {"F11", "fullscreen"}};
         // started by mousiki.cmd / lala.cmd (not mousiki-wt.cmd): the keys are named after F12, which is the unique one there
-        static const Hint hints_controls_f12[] = {{"SPACE", "play"}, {"F12←", "prev track"}, {"F12→", "next track"}, {"F12↑", "volume up"}, {"F12↓", "volume down"}, {"M", "mode"}, {"F12+T", "sort"}};
+        static const Hint hints_controls_f12[] = {{"SPACE", "play"}, {"F12←", "prev track"}, {"F12→", "next track"}, {"F12↑", "volume up"}, {"F12↓", "volume down"}, {"M", "mode"}, {"F12+T", "sort"}, {"F11", "fullscreen"}};
         const Hint* hints_controls = g_launched_from_wt ? hints_controls_s : hints_controls_f12;
         const size_t controls_count = sizeof(hints_controls_s) / sizeof(hints_controls_s[0]);
 #ifdef _WIN32

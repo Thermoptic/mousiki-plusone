@@ -52,6 +52,7 @@ int main(int argc, char** argv) {
     //    escape processing, without which the entire UI renders as literal
     //    escape-sequence text.
     muisc::win_bootstrap_env();
+    if (const char* fs = std::getenv("MOUSIKI_START_FULLSCREEN")) if (fs[0] == '1') muisc::win_post_f11_to_terminal();
     if (!muisc::win_console_init()) {
         std::cerr << "mousiki: this console does not support ANSI escape sequences.\n"
                      "Run it in Windows Terminal (wt.exe) rather than the legacy\n"
